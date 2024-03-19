@@ -8,9 +8,7 @@ export class Constants {
 
   public static readonly BCRYPT_SALT_ROUND = 10;
 
-  public static readonly FIRST_NAME_MAX_LENGTH = 255;
-
-  public static readonly LAST_NAME_MAX_LENGTH = 255;
+  public static readonly NAME = 255;
 
   public static readonly EMAIL_MAX_LENGTH = 255;
 
@@ -25,4 +23,6 @@ export class Constants {
   public static readonly OTP_EXPIRY = 300;
 
   public static readonly OTP_LENGTH = 6;
+
+  public static readonly ADDRESS_LENGTH = 255;
 }
