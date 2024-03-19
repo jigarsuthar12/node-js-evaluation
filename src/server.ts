@@ -1,17 +1,15 @@
 import { env } from "@configs";
-// import { ResetPasswordRequestEntity, TwoFactorAuthRequestEntity, UserEntity } from "@entities";
-// import { Cors, EnvValidator, HandleUnhandledPromise, Log } from "@helpers";
+import { RollEntity, UserEntity } from "@entities";
+import { HandleUnhandledPromise } from "@helpers";
 import { json, urlencoded } from "body-parser";
 import compression from "compression";
 import { DB } from "configs/db";
 import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
-import methodOverride from "method-override";
-// import { destructPager } from "middlewares";
-import { HandleUnhandledPromise } from "@helpers";
 import { EnvValidator } from "helpers/env-validator.helper";
 import { Log } from "helpers/logger.helper";
+import methodOverride from "method-override";
 import morgan from "morgan";
 import "reflect-metadata";
 import Routes from "./routes";
@@ -32,7 +30,7 @@ export default class App {
       username: env.dbUser,
       password: env.dbPassword,
       database: env.dbName,
-      // entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity],
+      entities: [UserEntity, RollEntity],
     });
 
     // Handle Unhandled Promise Rejections
