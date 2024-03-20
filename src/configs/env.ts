@@ -44,18 +44,6 @@ class Env {
 
   @IsNotEmpty()
   @IsString()
-  public twilioSID: string;
-
-  @IsNotEmpty()
-  @IsString()
-  public twilioToken: string;
-
-  @IsNotEmpty()
-  @IsString()
-  public twilioNumber: string;
-
-  @IsNotEmpty()
-  @IsString()
   public domain: string;
 }
 
@@ -71,7 +59,4 @@ env.smtpHost = process.env.SMTP_HOST;
 env.smtpPort = +process.env.SMTP_PORT;
 env.smtpUser = process.env.SMTP_USER;
 env.smtpPass = process.env.SMTP_PASS;
-env.twilioSID = process.env.TWILIO_SID;
-env.twilioToken = process.env.TWILIO_TOKEN;
-env.twilioNumber = process.env.TWILIO_NUMBER;
 env.domain = process.env.DOMAIN;
