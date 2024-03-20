@@ -1,6 +1,4 @@
-import { IsOptional } from "class-validator";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { RollEntity } from "./roll.entity";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("user")
 export class UserEntity {
@@ -31,8 +29,6 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @IsOptional()
-  @ManyToOne(() => RollEntity, roll => roll.id)
-  @JoinColumn({ name: "rollId" })
-  rollId: number;
+  @Column({ type: "varchar", nullable: false })
+  userType: string;
 }
