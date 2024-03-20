@@ -21,9 +21,10 @@ export class CreateUserDto {
   @Length(Constants.PASSWORD_MIN_LENGTH, Constants.PASSWORD_MAX_LENGTH)
   password: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  number?: string;
+  @Length(Constants.NUMBER_LENGTH)
+  number: string;
 
   @IsOptional()
   @IsString()

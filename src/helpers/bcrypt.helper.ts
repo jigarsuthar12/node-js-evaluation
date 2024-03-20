@@ -1,5 +1,5 @@
-import bcrypt from "bcrypt";
 import { Constants } from "@configs";
+import bcrypt from "bcrypt";
 
 export class Bcrypt {
   public static async hash(password: string): Promise<string> {
@@ -7,8 +7,8 @@ export class Bcrypt {
     return hashPassword;
   }
 
-  public static verify(plainTextPassword: string, hashPassword: string): Promise<boolean> {
-    const verify = bcrypt.compare(plainTextPassword, hashPassword);
+  public static async verify(plainTextPassword: string, hashPassword: string): Promise<boolean> {
+    const verify = await bcrypt.compare(plainTextPassword, hashPassword);
     return verify;
   }
 }
