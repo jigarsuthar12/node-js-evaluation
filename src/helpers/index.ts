@@ -5,6 +5,6 @@ export * from "./inject.cls";
 export * from "./jwt.helper";
 export * from "./logger.helper";
 export * from "./notification.helper";
-export * from "./sf-router";
+export * from "./sb-router";
 export * from "./typeorm.repository";
 export * from "./validate";

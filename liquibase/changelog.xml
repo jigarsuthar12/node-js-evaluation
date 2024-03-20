@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <!-- Change sets go here -->
-    <changeSet id="1" author="jigar suthar" >
+    <changeSet id="2" author="jigar " >
         <createTable tableName="user">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -20,62 +20,17 @@
             </column>
             <column name="number" type="varchar(15)">
             </column>
+            <column name="address" type="VARCHAR(255)" >
+                <constraints nullable="true" />
+            </column>
+            <column name="userType" type="varchar(255)" defaultValue="user" >
+                <constraints nullable="false"/>
+            </column>
             <column name="is2FAEnabled" type="boolean"/>
              <column name="createdAt" type="datetime" defaultValueComputed="now()" >
                 <constraints nullable="false"/>
             </column>
             <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
         </createTable>
-    </changeSet>
-   
-     <changeSet id="insert-into-roll" author="jigar suthar">
-      <preConditions onFail="MARK_RAN">
-        <not>
-            <tableExists tableName="roll" />
-        </not>
-    </preConditions>
-        <createTable tableName="roll">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="name" type="varchar(255)">
-            </column>
-            <column name="createdAt" type="datetime" defaultValueComputed="now()" />
-            <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="3" author="jigar suthar">
-        <addColumn tableName="user">
-            <column name="address" type="VARCHAR(255)" >
-                <constraints nullable="true" />
-            </column>
-        </addColumn>
-    </changeSet>
-
-   
-
-     <changeSet id="5" author="jigar">
-        <sql>
-            INSERT INTO roll (name) VALUES ('admin'),('user');
-        </sql>
-    </changeSet>
-
-       <changeSet id="6" author="jigar suthar">
-        <addColumn tableName="user">
-            <column name="rollId" type="INT" defaultValue="2" >
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="add-foreign-key-to-user-table" author="jigar suthar">
-    <addForeignKeyConstraint baseTableName="user"
-                              baseColumnNames="rollId"
-                              constraintName="fk_user_roll"
-                              referencedTableName="roll"
-                              referencedColumnNames="id"
-                              onDelete="CASCADE"
-                              onUpdate="CASCADE"/>
     </changeSet>
 </databaseChangeLog>
