@@ -23,6 +23,6 @@
   },
   "emitDecoratorMetadata": true,
   "experimentalDecorators": true,
-  "include": ["src/**/*.ts", "src/types/types.ts", "src/types/sf-router.delegates.ts"],
+  "include": ["src/**/*.ts", "src/types/types.ts", "src/types/sb-router.delegates.ts"],
   "exclude": ["node_modules"]
 }

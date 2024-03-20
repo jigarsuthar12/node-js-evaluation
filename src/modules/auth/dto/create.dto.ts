@@ -1,5 +1,5 @@
 import { Constants } from "@configs";
-import { IsBoolean, IsEmail, IsInt, IsNotEmpty, IsOptional, IsString, Length, Matches, MaxLength } from "class-validator";
+import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, Length, Matches, MaxLength } from "class-validator";
 
 export class CreateUserDto {
   @IsString()
@@ -35,6 +35,6 @@ export class CreateUserDto {
   is2FAEnabled?: boolean;
 
   @IsOptional()
-  @IsInt()
-  rollId?: number;
+  @IsString()
+  userType?: string;
 }
