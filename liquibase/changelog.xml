@@ -34,4 +34,9 @@
             <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
         </createTable>
     </changeSet>
+    <changeSet id="insert-into-user" author="jigar ">
+    <sql>
+        INSERT INTO user (name,email,password,number,address,userType) VALUES ('jigar','sutharjigar348@gmail.com','jigar989','8849146245','maninagar','admin');
+    </sql>
+</changeSet>
 </databaseChangeLog>
