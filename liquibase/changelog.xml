@@ -35,8 +35,37 @@
         </createTable>
     </changeSet>
     <changeSet id="insert-into-user" author="jigar ">
-    <sql>
-        INSERT INTO user (name,email,password,number,address,userType) VALUES ('jigar','sutharjigar348@gmail.com','jigar989','8849146245','maninagar','admin');
-    </sql>
-</changeSet>
+        <sql>
+            INSERT INTO user (name,email,password,number,address,userType) VALUES ('jigar','sutharjigar348@gmail.com','jigar989','8849146245','maninagar','admin');
+        </sql>
+    </changeSet>
+    <changeSet id="4" author="jigar suthar">
+        <createTable tableName="resetPasswordRequest">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="userId" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="createdAt" type="datetime" defaultValueComputed="now()" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="5" author="jigar suthar">
+        <createTable tableName="twoFactorAuthRequest">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="userId" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="hashCode" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="createdAt" type="datetime" defaultValueComputed="now()" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
