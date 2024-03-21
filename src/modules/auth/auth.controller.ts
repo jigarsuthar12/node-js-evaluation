@@ -5,6 +5,7 @@ import { TRequest, TResponse } from "@types";
 import moment from "moment";
 import { MoreThanOrEqual, Repository } from "typeorm";
 import { CreateUserDto, ResetPasswordDto, SendTwoFactorDto, SignInDto, VerifyTwoFactorDto } from "./dto";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 
 export class AuthController {
   @InitRepository(UserEntity)
@@ -105,6 +106,31 @@ export class AuthController {
     return res.status(200).json({ msg: "2FA_VERIFY" });
   };
 
+  public forgotPassword = async (req: TRequest<ForgotPasswordDto>, res: TResponse) => {
+    const { email } = req.dto;
+
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: ["id", "email", "name"],
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "Please verify email account!" });
+    }
+
+    const resetPasswordRequest = await this.resetPasswordRequest.create({ userId: user.id });
+    await this.resetPasswordRequest.save(resetPasswordRequest);
+
+    const emailData = `<a>localhost:8080/reset-password/${resetPasswordRequest.id}</a>`;
+
+    try {
+      await Notification.email("reset-password", emailData, [user.email]);
+      return res.status(200).json({ msg: "RESET_PASSWORD_LINK" });
+    } catch (err) {
+      return res.status(400).json({ error: err });
+    }
+  };
+
   public resetPassword = async (req: TRequest<ResetPasswordDto>, res: TResponse) => {
     const { password } = req.dto as ResetPasswordDto;
     const { token } = req.params;
@@ -113,7 +139,7 @@ export class AuthController {
 
     const resetPasswordRequest = await this.resetPasswordRequest.findOne({
       where: {
-        id: token,
+        id: parseInt(token, 10),
         createdAt: MoreThanOrEqual(resetPassExpiryDate),
       },
       order: {
