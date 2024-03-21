@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeor
 @Entity("twoFactorAuthRequest")
 export class TwoFactorAuthRequestEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column({ type: "integer", nullable: false })
   userId: number;
