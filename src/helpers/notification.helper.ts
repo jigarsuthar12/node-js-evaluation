@@ -1,11 +1,9 @@
 import { Constants, env } from "@configs";
-import Email from "email-templates";
 import nodemailer from "nodemailer";
-import twilio from "twilio";
 import { Log } from "./logger.helper";
 
 export class Notification {
-  public static async email(templateName: string, dynamicData: object, to: string[]) {
+  public static async email(subject: string, dynamicData: string, to: string[]) {
     const logger = Log.getLogger();
     const emailTransport = nodemailer.createTransport({
       host: env.smtpHost,
@@ -16,38 +14,15 @@ export class Notification {
         pass: env.smtpPass,
       },
     });
-
-    const email = new Email({
-      message: {
-        from: Constants.FROM_EMAIL,
-      },
-      send: true,
-      transport: emailTransport,
+    const sentEmail = await emailTransport.sendMail({
+      from: Constants.FROM_EMAIL,
+      to,
+      subject,
+      text: dynamicData,
     });
 
-    const sentEmail = await email.send({
-      template: templateName,
-      message: { to },
-      locals: dynamicData,
-    });
-    logger.info("Email sent successfully", { emails: to, messageId: sentEmail.messageId });
+    logger.info("Email sent successfully", { emails: to });
 
     return sentEmail;
-  }
-
-  public static async sms(message: string, phoneNumber: string): Promise<void> {
-    const logger = Log.getLogger();
-    const client = twilio(env.twilioSID, env.twilioToken);
-    try {
-      const twilioMessage = await client.messages.create({
-        body: message,
-        from: env.twilioNumber,
-        to: phoneNumber,
-      });
-      logger.info("SMS sent with SID", twilioMessage.messagingServiceSid);
-    } catch (err) {
-      logger.warn("Error sending SMS", err);
-      throw err;
-    }
   }
 }
