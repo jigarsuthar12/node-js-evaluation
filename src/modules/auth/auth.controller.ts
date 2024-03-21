@@ -4,7 +4,7 @@ import { Bcrypt, GenerateOTP, InitRepository, InjectRepositories, JwtHelper, Not
 import { TRequest, TResponse } from "@types";
 import moment from "moment";
 import { MoreThanOrEqual, Repository } from "typeorm";
-import { CreateUserDto, SendTwoFactorDto, SignInDto, VerifyTwoFactorDto } from "./dto";
+import { CreateUserDto, ResetPasswordDto, SendTwoFactorDto, SignInDto, VerifyTwoFactorDto } from "./dto";
 
 export class AuthController {
   @InitRepository(UserEntity)
@@ -103,5 +103,32 @@ export class AuthController {
     }
 
     return res.status(200).json({ msg: "2FA_VERIFY" });
+  };
+
+  public resetPassword = async (req: TRequest<ResetPasswordDto>, res: TResponse) => {
+    const { password } = req.dto as ResetPasswordDto;
+    const { token } = req.params;
+
+    const resetPassExpiryDate = moment().subtract(Constants.RESET_PASS_EXPIRY, "seconds").toDate();
+
+    const resetPasswordRequest = await this.resetPasswordRequest.findOne({
+      where: {
+        id: token,
+        createdAt: MoreThanOrEqual(resetPassExpiryDate),
+      },
+      order: {
+        createdAt: "DESC",
+      },
+    });
+
+    if (resetPasswordRequest) {
+      const hashPassword = await Bcrypt.hash(password);
+      await this.userRepository.update(resetPasswordRequest.userId, { password: hashPassword });
+      await this.resetPasswordRequest.delete(token);
+    } else {
+      return res.status(400).json({ error: "Request invalid or expired, please try again!" });
+    }
+
+    return res.status(200).json({ msg: "PASSWORD_UPDATE" });
   };
 }
