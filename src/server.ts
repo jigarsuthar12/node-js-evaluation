@@ -1,5 +1,5 @@
 import { env } from "@configs";
-import { ResetPasswordRequestEntity, TwoFactorAuthRequestEntity, UserEntity } from "@entities";
+import { ProductEntity, ResetPasswordRequestEntity, TwoFactorAuthRequestEntity, UserEntity } from "@entities";
 import { HandleUnhandledPromise } from "@helpers";
 import { json, urlencoded } from "body-parser";
 import compression from "compression";
@@ -30,7 +30,7 @@ export default class App {
       username: env.dbUser,
       password: env.dbPassword,
       database: env.dbName,
-      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity],
+      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity, ProductEntity],
     });
 
     // Handle Unhandled Promise Rejections
