@@ -1,18 +1,11 @@
 import { Constants } from "@configs";
+import { Category } from "@types";
 import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
-
-enum Category {
-  MOBILE = "Mobile",
-  COMPUTER = "Computer",
-  BOOKS = "Books",
-  CAR = "Car",
-  GROCERY = "Grocery",
-}
 
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(Constants.NAME)
+  @MaxLength(Constants.NAME_LENGTH)
   name: string;
 
   @IsInt()

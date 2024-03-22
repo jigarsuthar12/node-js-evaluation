@@ -4,7 +4,7 @@ import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, Length, Matches, 
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(Constants.NAME)
+  @MaxLength(Constants.NAME_LENGTH)
   name: string;
 
   @IsString()

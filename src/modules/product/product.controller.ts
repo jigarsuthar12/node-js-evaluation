@@ -13,7 +13,8 @@ export class ProductController {
   }
 
   public create = async (req: TRequest<CreateProductDto>, res: TResponse) => {
-    const product = this.productRepository.create(req.dto);
+    const { name, price, imageUrl, description, discount, category } = req.dto as CreateProductDto;
+    const product = this.productRepository.create({ name, price, imageUrl, description, discount, category });
     await this.productRepository.save(product);
 
     return res.status(201).json({ msg: "PRODUCT_CREATED" });

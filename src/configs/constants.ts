@@ -10,7 +10,7 @@ export class Constants {
 
   public static readonly NUMBER_LENGTH = 10;
 
-  public static readonly NAME = 255;
+  public static readonly NAME_LENGTH = 255;
 
   public static readonly EMAIL_MAX_LENGTH = 255;
 

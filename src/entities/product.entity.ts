@@ -1,12 +1,7 @@
+import { Category } from "@types";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-export enum Category {
-  MOBILE = "Mobile",
-  COMPUTER = "Computer",
-  BOOKS = "Books",
-  CAR = "Car",
-  GROCERY = "Grocery",
-}
+
 
 @Entity("product")
 export class ProductEntity {
