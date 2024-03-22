@@ -68,4 +68,31 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="6" author="jigar">
+        <createTable tableName="product">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="imageUrl" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discount" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="category" type="ENUM('Mobile', 'Computer', 'Books', 'Car', 'Grocery')">
+                <constraints nullable="false"/>
+            </column>
+             <column name="createdAt" type="datetime" defaultValueComputed="now()" />
+            <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

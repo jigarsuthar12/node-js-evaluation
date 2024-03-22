@@ -26,7 +26,7 @@ export class AuthController {
     const user = await this.userRepository.create(req.dto);
     await this.userRepository.save(user);
 
-    return res.status(200).json({ msg: "USER_CREATED" });
+    return res.status(201).json({ msg: "USER_CREATED" });
   };
 
   public signIn = async (req: TRequest<SignInDto>, res: TResponse) => {

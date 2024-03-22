@@ -46,3 +46,11 @@ export enum EStatusYN {
 }
 
 export enum Roles {}
+
+export enum Category {
+  MOBILE = "Mobile",
+  COMPUTER = "Computer",
+  BOOKS = "Books",
+  CAR = "Car",
+  GROCERY = "Grocery",
+}
