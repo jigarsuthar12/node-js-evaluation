@@ -16,5 +16,6 @@ export class ProductRouter extends SFRouter implements RouterDelegates {
     this.router.put("/update-product/:productId", Validator.validate(UpdateProductDto), this.authMiddleware.auth, this.authMiddleware.isAdmin, this.productController.update);
     this.router.get("/", this.productController.get);
     this.router.get("/get-trending-list", this.productController.getTrendingList);
+    this.router.get("/get-detail/:productId", this.productController.getDetails);
   }
 }
