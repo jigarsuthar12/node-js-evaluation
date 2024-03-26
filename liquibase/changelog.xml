@@ -116,4 +116,19 @@
             <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
         </createTable>
     </changeSet>
+     <changeSet id="8" author="jigar">
+        <createTable tableName="cart">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="productId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_cart_product" references="product(id)"/>
+            </column>
+            <column name="userId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_cart_user" references="user(id)"/>
+            </column>
+            <column name="createdAt" type="datetime" defaultValueComputed="now()" />
+            <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
