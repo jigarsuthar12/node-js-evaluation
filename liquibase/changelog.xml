@@ -95,4 +95,25 @@
             <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
         </createTable>
     </changeSet>
+     <changeSet id="7" author="jigar">
+        <createTable tableName="review">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rating" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="productId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_review_product" references="product(id)"/>
+            </column>
+            <column name="userId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_review_user" references="user(id)"/>
+            </column>
+            <column name="createdAt" type="datetime" defaultValueComputed="now()" />
+            <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

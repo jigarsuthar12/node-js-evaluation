@@ -27,4 +27,8 @@ export class Constants {
   public static readonly OTP_LENGTH = 6;
 
   public static readonly ADDRESS_LENGTH = 255;
+
+  public static readonly MAX_RATING = 5;
+
+  public static readonly MIN_RATING = 1;
 }
