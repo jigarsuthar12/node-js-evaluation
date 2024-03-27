@@ -52,9 +52,9 @@ export class AuthController {
   };
 
   public sendTwoFactor = async (req: TRequest<SendTwoFactorDto>, res: TResponse) => {
-    const { number } = req.dto;
+    const { email } = req.dto;
     const user = await this.userRepository.findOne({
-      where: { number },
+      where: { email },
       select: ["id", "email"],
     });
     const otp = GenerateOTP.generate();
@@ -160,9 +160,12 @@ export class AuthController {
 
   public updateProfile = async (req: TRequest<UpdateProfileDto>, res: TResponse) => {
     const { email, name, number, password, address, is2FAEnabled } = req.dto as UpdateProfileDto;
-    const hashpassword = await Bcrypt.hash(password);
+    if (password) {
+      const hashpassword = await Bcrypt.hash(password);
+      await this.userRepository.update({ id: Number(req.me.id) }, { email, name, password: hashpassword, number, address, is2FAEnabled });
+    }
 
-    await this.userRepository.update({ id: Number(req.me.id) }, { email, name, password: hashpassword, number, address, is2FAEnabled });
+    await this.userRepository.update({ id: Number(req.me.id) }, { email, name, number, address, is2FAEnabled });
     return res.status(200).json({ msg: "PROFILE_UPDATED" });
   };
 }
