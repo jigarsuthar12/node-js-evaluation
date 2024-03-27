@@ -72,4 +72,10 @@ export class OrderController {
     const user = await this.userRepository.findOne({ where: { id: order.userId } });
     return res.status(200).json({ msg: "GOT_ORDER", ...order, product, reviews: mapppedReviews, username: user.name });
   };
+
+  public getOrderStatus = async (req: TRequest, res: TResponse) => {
+    const { orderId } = req.params as ReviewParams;
+    const orderStatus = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
+    return res.status(200).json({ msg: "ORDER_STATUS", status: orderStatus.status });
+  };
 }
