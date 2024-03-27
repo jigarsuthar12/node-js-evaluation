@@ -78,4 +78,10 @@ export class OrderController {
     const orderStatus = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
     return res.status(200).json({ msg: "ORDER_STATUS", status: orderStatus.status });
   };
+
+  public cancelOrder = async (req: TRequest, res: TResponse) => {
+    const { orderId } = req.params as ReviewParams;
+    await this.orderRepository.update({ id: Number(orderId), userId: req.me.id }, { cancleFlag: true });
+    return res.status(200).json({ msg: "ORDER_CANCELLED!!" });
+  };
 }
