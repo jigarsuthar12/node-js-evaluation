@@ -6,6 +6,7 @@ import { Repository } from "typeorm";
 
 interface ReviewParams {
   productId?: number;
+  orderId?: number;
 }
 
 export class OrderController {
@@ -55,5 +56,20 @@ export class OrderController {
     await this.orderRepository.save(order);
 
     return res.status(201).json({ msg: "ORDER_CREATED" });
+  };
+
+  public getDetails = async (req: TRequest, res: TResponse) => {
+    const { orderId } = req.params as ReviewParams;
+    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const product = await this.productRepository.findOne({ where: { id: order.productId } });
+    const reviews = await this.reviewRepository.find({ where: { productId: product.id } });
+    const mapppedReviews = await Promise.all(
+      reviews.map(async item => {
+        const user = await this.userRepository.findOne({ where: { id: item.userId } });
+        return { ...item, username: user.name };
+      }),
+    );
+    const user = await this.userRepository.findOne({ where: { id: order.userId } });
+    return res.status(200).json({ msg: "GOT_ORDER", ...order, product, reviews: mapppedReviews, username: user.name });
   };
 }
