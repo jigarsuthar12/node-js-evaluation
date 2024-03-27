@@ -35,18 +35,6 @@ export interface TRequest<T = any> extends Request {
 
 export interface TResponse extends Response {}
 
-export enum EStatus {
-  Active = "Active",
-  Inactive = "Inactive",
-}
-
-export enum EStatusYN {
-  Yes = "Yes",
-  No = "No",
-}
-
-export enum Roles {}
-
 export enum Category {
   MOBILE = "Mobile",
   COMPUTER = "Computer",

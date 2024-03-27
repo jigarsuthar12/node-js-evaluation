@@ -5,6 +5,7 @@ import { json, urlencoded } from "body-parser";
 import compression from "compression";
 import { DB } from "configs/db";
 import dotenv from "dotenv";
+import { ReviewEntity } from "entities/review.entity";
 import express from "express";
 import helmet from "helmet";
 import { EnvValidator } from "helpers/env-validator.helper";
@@ -30,7 +31,7 @@ export default class App {
       username: env.dbUser,
       password: env.dbPassword,
       database: env.dbName,
-      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity, ProductEntity],
+      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity, ProductEntity, ReviewEntity],
     });
 
     // Handle Unhandled Promise Rejections
