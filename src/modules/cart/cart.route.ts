@@ -12,5 +12,7 @@ export class CartRouter extends SFRouter implements RouterDelegates {
 
   initRoutes(): void {
     this.router.post("/:productId", this.authMiddleware.auth, this.cartController.create);
+    this.router.get("/", this.authMiddleware.auth, this.cartController.get);
+    this.router.delete("/:productId", this.authMiddleware.auth, this.cartController.deleteFromCart);
   }
 }
