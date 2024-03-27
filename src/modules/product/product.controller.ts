@@ -1,4 +1,4 @@
-import { ProductEntity } from "@entities";
+import { ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories } from "@helpers";
 import { Category, TRequest, TResponse } from "@types";
 import { Between, FindOperator, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from "typeorm";
@@ -30,9 +30,29 @@ export class ProductController {
   @InitRepository(ProductEntity)
   productRepository: Repository<ProductEntity>;
 
+  @InitRepository(ReviewEntity)
+  reviewRepository: Repository<ReviewEntity>;
+
+  @InitRepository(UserEntity)
+  userRepository: Repository<UserEntity>;
+
   constructor() {
     InjectRepositories(this);
   }
+
+  public getDetails = async (req: TRequest, res: TResponse) => {
+    const { productId } = req.params;
+    const product = await this.productRepository.findOne({ where: { id: Number(productId) } });
+    const review = await this.reviewRepository.find({ where: { productId: product.id } });
+
+    const updatedReview = await Promise.all(
+      review.map(async item => {
+        const user = await this.userRepository.findOne({ where: { id: item.userId } });
+        return { ...item, username: user.name };
+      }),
+    );
+    return res.status(200).json({ msg: "PRODUCT_DETAIL", ...product, reviews: updatedReview });
+  };
 
   public getTrendingList = async (req: TRequest, res: TResponse) => {
     const products = await this.productRepository.find({
@@ -41,17 +61,40 @@ export class ProductController {
       },
       take: 5,
     });
-
-    return res.status(200).json({ msg: "TRENDING ITEMS", products });
+    const updatedProducts = await Promise.all(
+      products.map(async item => {
+        const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+        const updatedReviews = await Promise.all(
+          reviews.map(async reviewItem => {
+            const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
+            return { ...reviewItem, username: user.name };
+          }),
+        );
+        return { ...item, reviews: updatedReviews };
+      }),
+    );
+    return res.status(200).json({ msg: "TRENDING ITEMS", updatedProducts });
   };
 
   public get = async (req: TRequest, res: TResponse) => {
-    const { allProducts, name, category, minPrice, maxPrice, sortBy, discount } = req.query as ProductQueryParams;
+    const { allProducts, name, category, minPrice, maxPrice, sortBy, rating, discount } = req.query as ProductQueryParams;
 
     const where: WhereClause<Product> = {};
     if (allProducts === "true") {
       const products = await this.productRepository.find();
-      return res.status(200).json({ msg: "ALL PRODUCTS", products });
+      const updatedProducts = await Promise.all(
+        products.map(async item => {
+          const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+          const updatedReviews = await Promise.all(
+            reviews.map(async reviewItem => {
+              const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
+              return { ...reviewItem, username: user.name };
+            }),
+          );
+          return { ...item, reviews: updatedReviews };
+        }),
+      );
+      return res.status(200).json({ msg: "ALL PRODUCTS", updatedProducts });
     }
     if (category && name) {
       where.category = category;
@@ -87,7 +130,41 @@ export class ProductController {
       where.discount = discount;
     }
     const products = await this.productRepository.find({ where, order });
-    return res.status(200).json({ msg: "ALL FILTERED PRODUCTS", products });
+    const updatedProducts = await Promise.all(
+      products.map(async item => {
+        const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+        const updatedReviews = await Promise.all(
+          reviews.map(async reviewItem => {
+            const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
+            return { ...reviewItem, username: user.name };
+          }),
+        );
+        return { ...item, reviews: updatedReviews };
+      }),
+    );
+
+    if (rating) {
+      const ratingProducts = await this.productRepository
+        .createQueryBuilder("product")
+        .leftJoinAndSelect("product.reviews", "review")
+        .where("review.rating = :rating", { rating })
+        .getMany();
+
+      const updatedRatingProducts = await Promise.all(
+        ratingProducts.map(async item => {
+          const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+          const updatedReviews = await Promise.all(
+            reviews.map(async reviewItem => {
+              const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
+              return { ...reviewItem, username: user.name };
+            }),
+          );
+          return { ...item, reviews: updatedReviews };
+        }),
+      );
+      return res.status(200).json({ msg: "ALL FILTERED PRODUCTS", updatedRatingProducts });
+    }
+    return res.status(200).json({ msg: "ALL FILTERED PRODUCTS", updatedProducts });
   };
 
   public create = async (req: TRequest<CreateProductDto>, res: TResponse) => {
