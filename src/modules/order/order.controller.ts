@@ -60,7 +60,7 @@ export class OrderController {
 
   public getDetails = async (req: TRequest, res: TResponse) => {
     const { orderId } = req.params as ReviewParams;
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
     const product = await this.productRepository.findOne({ where: { id: order.productId } });
     const reviews = await this.reviewRepository.find({ where: { productId: product.id } });
     const mapppedReviews = await Promise.all(
