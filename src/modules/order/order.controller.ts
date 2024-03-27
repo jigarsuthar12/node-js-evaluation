@@ -1,6 +1,6 @@
 import { ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories } from "@helpers";
-import { TRequest, TResponse } from "@types";
+import { Status, TRequest, TResponse } from "@types";
 import { OrderEntity } from "entities/order.entity";
 import { Repository } from "typeorm";
 
@@ -83,5 +83,12 @@ export class OrderController {
     const { orderId } = req.params as ReviewParams;
     await this.orderRepository.update({ id: Number(orderId), userId: req.me.id }, { cancleFlag: true });
     return res.status(200).json({ msg: "ORDER_CANCELLED!!" });
+  };
+
+  public updateStatus = async (req: TRequest, res: TResponse) => {
+    const { orderId } = req.params as ReviewParams;
+    await this.orderRepository.update({ id: Number(orderId) }, { status: Status.PROCESSING });
+
+    return res.status(200).json({ msg: "STATUS_UPDATED" });
   };
 }
