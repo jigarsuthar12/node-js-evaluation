@@ -6,6 +6,7 @@ import compression from "compression";
 import { DB } from "configs/db";
 import dotenv from "dotenv";
 import { CartEntity } from "entities/cart.entity";
+import { OrderEntity } from "entities/order.entity";
 import { ReviewEntity } from "entities/review.entity";
 import express from "express";
 import helmet from "helmet";
@@ -32,7 +33,7 @@ export default class App {
       username: env.dbUser,
       password: env.dbPassword,
       database: env.dbName,
-      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity, ProductEntity, CartEntity, ReviewEntity],
+      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity, ProductEntity, CartEntity, ReviewEntity, OrderEntity],
     });
 
     // Handle Unhandled Promise Rejections

@@ -42,3 +42,19 @@ export enum Category {
   CAR = "Car",
   GROCERY = "Grocery",
 }
+
+export enum Status {
+  PENDING = "Pending",
+  DELIEVERED = "Delivered",
+  CANCELLED = "Cancelled",
+  SHIPPED = "Shipped",
+  PROCESSING = "Processing",
+}
+
+export enum PaymentMethod {
+  CREDITCARD = "Credit Card",
+  DEBITCARD = "Debit Card",
+  PAYPAL = "PayPal",
+  CASHONDELIVERY = "Cash On Delivery",
+  OTHER = "Other",
+}

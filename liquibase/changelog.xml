@@ -131,4 +131,28 @@
             <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
         </createTable>
     </changeSet>
+    <changeSet id="10" author="jigar">
+        <createTable tableName="order">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+             <column name="productId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_order_product" references="product(id)"/>
+            </column>
+            <column name="userId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_order_user" references="user(id)"/>
+            </column>
+            <column name="paymentMethod" type="ENUM('Credit Card', 'Debit Card', 'PayPal', 'Cash on Delivery', 'Other')">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="ENUM('Pending', 'Delivered', 'Cancelled', 'Shipped', 'Processing')" defaultValue="Pending">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cancleFlag" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="true"/>
+            </column>
+            <column name="createdAt" type="datetime" defaultValueComputed="now()" />
+            <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
