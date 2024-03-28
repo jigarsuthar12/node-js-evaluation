@@ -19,7 +19,7 @@ export class CartItemEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, default: 1 })
   quantity: number;
 
   @ManyToOne(() => ProductEntity, product => product.cart)
