@@ -10,8 +10,9 @@ interface ProductQueryParams {
   category?: Category;
   minPrice?: number;
   maxPrice?: number;
-  rating?: number;
   discount?: string;
+  minRating?: number;
+  maxRating?: number;
   sortBy?: "priceLowToHigh" | "priceHighToLow" | "name";
 }
 
@@ -77,7 +78,7 @@ export class ProductController {
   };
 
   public get = async (req: TRequest, res: TResponse) => {
-    const { allProducts, name, category, minPrice, maxPrice, sortBy, rating, discount } = req.query as ProductQueryParams;
+    const { allProducts, name, category, minPrice, maxPrice, sortBy, minRating, maxRating, discount } = req.query as ProductQueryParams;
 
     const where: WhereClause<Product> = {};
     if (allProducts === "true") {
@@ -143,12 +144,14 @@ export class ProductController {
       }),
     );
 
-    if (rating) {
+    if (minRating && maxRating) {
       const ratingProducts = await this.productRepository
         .createQueryBuilder("product")
-        .leftJoinAndSelect("product.reviews", "review")
-        .where("review.rating = :rating", { rating })
-        .getMany();
+        .leftJoin("product.reviews", "review")
+        .select("product.id, product.name, AVG(review.rating) as avgRating")
+        .groupBy("product.id")
+        .having("AVG(review.rating) BETWEEN :minRating AND :maxRating", { minRating, maxRating })
+        .getRawMany();
 
       const updatedRatingProducts = await Promise.all(
         ratingProducts.map(async item => {
@@ -162,7 +165,53 @@ export class ProductController {
           return { ...item, reviews: updatedReviews };
         }),
       );
-      return res.status(200).json({ msg: "ALL FILTERED PRODUCTS", updatedRatingProducts });
+      return res.status(200).json({ msg: "ALL FILTERED RATING PRODUCTS", updatedRatingProducts });
+    }
+    if (maxRating) {
+      const ratingProducts = await this.productRepository
+        .createQueryBuilder("product")
+        .leftJoin("product.reviews", "review")
+        .select("product.id, product.name, AVG(review.rating) as avgRating")
+        .groupBy("product.id")
+        .having("AVG(review.rating) <= :maxRating", { maxRating })
+        .getRawMany();
+
+      const updatedRatingProducts = await Promise.all(
+        ratingProducts.map(async item => {
+          const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+          const updatedReviews = await Promise.all(
+            reviews.map(async reviewItem => {
+              const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
+              return { ...reviewItem, username: user.name };
+            }),
+          );
+          return { ...item, reviews: updatedReviews };
+        }),
+      );
+      return res.status(200).json({ msg: "ALL FILTERED RATING PRODUCTS", updatedRatingProducts });
+    }
+    if (minRating) {
+      const ratingProducts = await this.productRepository
+        .createQueryBuilder("product")
+        .leftJoin("product.reviews", "review")
+        .select("product.id, product.name, AVG(review.rating) as avgRating")
+        .groupBy("product.id")
+        .having("AVG(review.rating) >= :minRating", { minRating })
+        .getRawMany();
+
+      const updatedRatingProducts = await Promise.all(
+        ratingProducts.map(async item => {
+          const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+          const updatedReviews = await Promise.all(
+            reviews.map(async reviewItem => {
+              const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
+              return { ...reviewItem, username: user.name };
+            }),
+          );
+          return { ...item, reviews: updatedReviews };
+        }),
+      );
+      return res.status(200).json({ msg: "ALL FILTERED RATING PRODUCTS", updatedRatingProducts });
     }
     return res.status(200).json({ msg: "ALL FILTERED PRODUCTS", updatedProducts });
   };
