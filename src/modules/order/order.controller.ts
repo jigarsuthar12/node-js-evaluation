@@ -45,13 +45,15 @@ export class OrderController {
             const mappedProducts = await Promise.all(
               products.map(async productItem => {
                 const reviews = await this.reviewRepository.find({ where: { productId: productItem.id } });
+                const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+                const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
                 const updatedReviews = await Promise.all(
                   reviews.map(async reviewItem => {
                     const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
                     return { ...reviewItem, username: user.name };
                   }),
                 );
-                return { ...productItem, reviews: updatedReviews };
+                return { ...productItem, reviews: updatedReviews, avgRating };
               }),
             );
             return { product: mappedProducts };
@@ -92,6 +94,9 @@ export class OrderController {
       orderItems.map(async item => {
         const product = await this.productRepository.findOne({ where: { id: item.productId } });
         const reviews = await this.reviewRepository.find({ where: { productId: product.id } });
+        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+        const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+
         const mapppedReviews = await Promise.all(
           reviews.map(async mappedreview => {
             const user = await this.userRepository.findOne({ where: { id: mappedreview.userId } });
@@ -99,7 +104,7 @@ export class OrderController {
           }),
         );
 
-        return { ...item, product, review: mapppedReviews };
+        return { ...item, product, review: mapppedReviews, avgRating };
       }),
     );
 

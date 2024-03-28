@@ -38,13 +38,16 @@ export class CartController {
         const updatedProduct = await Promise.all(
           product.map(async productItem => {
             const reviews = await this.reviewRepository.find({ where: { productId: productItem.id } });
+            const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+            const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+
             const updatedReviews = await Promise.all(
               reviews.map(async reviewItem => {
                 const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
                 return { ...reviewItem, username: user.name };
               }),
             );
-            return { ...productItem, reviews: updatedReviews };
+            return { ...productItem, reviews: updatedReviews, avgRating };
           }),
         );
 
