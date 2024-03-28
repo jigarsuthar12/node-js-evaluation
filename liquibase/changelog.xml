@@ -155,4 +155,32 @@
             <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
         </createTable>
     </changeSet>
+  <changeSet author="jigar" id="11">
+        <dropForeignKeyConstraint
+            baseTableName="cart"
+            constraintName="fk_cart_product"/>
+    </changeSet>
+    <changeSet author="jigar" id="12">
+        <dropColumn tableName="cart" columnName="productId"/>
+    </changeSet>
+    <changeSet author="jigar" id="13">
+        <createTable tableName="cartItem">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="productId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_cart_product" references="product(id)"/>
+            </column>
+            <column name="cartId" type="int">
+                <constraints nullable="false" foreignKeyName="fk_cartItem_cart" references="cart(id)"/>
+            </column>
+            <column name="createdAt" type="datetime" defaultValueComputed="now()" />
+            <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jigar" id="14">
+        <addColumn tableName="cartItem">
+            <column name="quantity" type="INT"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

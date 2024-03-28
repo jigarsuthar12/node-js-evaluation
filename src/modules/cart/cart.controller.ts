@@ -1,6 +1,7 @@
 import { CartEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories } from "@helpers";
 import { TRequest, TResponse } from "@types";
+import { CartItemEntity } from "entities/cartItem.entity";
 import { Repository } from "typeorm";
 
 interface ReviewParams {
@@ -20,14 +21,18 @@ export class CartController {
   @InitRepository(ProductEntity)
   productRepository: Repository<ProductEntity>;
 
+  @InitRepository(CartItemEntity)
+  cartItemRepository: Repository<CartItemEntity>;
+
   constructor() {
     InjectRepositories(this);
   }
 
   public get = async (req: TRequest, res: TResponse) => {
-    const carts = await this.cartRepository.find({ where: { userId: req.me.id } });
-    const updatedCarts = await Promise.all(
-      carts.map(async item => {
+    const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
+    const cartItems = await this.cartItemRepository.find({ where: { cartId: cart.id } });
+    const mappedCartItems = await Promise.all(
+      cartItems.map(async item => {
         const product = await this.productRepository.find({
           where: { id: item.productId },
         });
@@ -48,20 +53,46 @@ export class CartController {
       }),
     );
     const user = await this.userRepository.findOne({ where: { id: req.me.id } });
-    return res.status(200).json({ msg: "GOT_CART_ITEMS", Cart: updatedCarts, username: user.name });
+    return res.status(200).json({ msg: "GOT_CART_ITEMS", Cart: mappedCartItems, username: user.name });
   };
 
   public create = async (req: TRequest, res: TResponse) => {
     const { productId } = req.params as ReviewParams;
-    const cart = await this.cartRepository.create({ productId: Number(productId), userId: req.me.id });
-    await this.cartRepository.save(cart);
+
+    const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
+    if (!cart) {
+      const newCart = await this.cartRepository.create({ userId: Number(req.me.id) });
+      await this.cartRepository.save(newCart);
+
+      const cartItem = await this.cartItemRepository.create({ productId: Number(productId), cartId: newCart.id });
+      await this.cartItemRepository.save(cartItem);
+
+      return res.status(201).json({ msg: "CART_ADDED" });
+    }
+    const cartItemProduct = await this.cartItemRepository.findOne({ where: { productId, cartId: cart.id } });
+    if (cartItemProduct) {
+      cartItemProduct.quantity += 1;
+      await this.cartItemRepository.save(cartItemProduct);
+      return res.status(200).json({ msg: "CART_ADDED" });
+    }
+
+    const cartItem = await this.cartItemRepository.create({ productId: Number(productId), cartId: cart.id });
+    await this.cartItemRepository.save(cartItem);
 
     return res.status(201).json({ msg: "CART_ADDED" });
   };
 
   public deleteFromCart = async (req: TRequest, res: TResponse) => {
     const { productId } = req.params as ReviewParams;
-    await this.cartRepository.delete({ productId, userId: req.me.id });
+    const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
+
+    const cartItem = await this.cartItemRepository.findOne({ where: { cartId: cart.id, productId } });
+    if (cartItem.quantity) {
+      cartItem.quantity -= 1;
+      this.cartItemRepository.save(cartItem);
+      return res.status(200).json({ msg: "PRODUCT_FROM_CART_DELETED" });
+    }
+    await this.cartItemRepository.delete({ productId, cartId: cart.id });
     return res.status(200).json({ msg: "PRODUCT_FROM_CART_DELETED" });
   };
 }
