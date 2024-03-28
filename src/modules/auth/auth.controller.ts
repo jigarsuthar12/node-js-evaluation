@@ -4,7 +4,7 @@ import { Bcrypt, GenerateOTP, InitRepository, InjectRepositories, JwtHelper, Not
 import { TRequest, TResponse } from "@types";
 import moment from "moment";
 import { MoreThanOrEqual, Repository } from "typeorm";
-import { CreateUserDto, ResetPasswordDto, SendTwoFactorDto, SignInDto, VerifyTwoFactorDto } from "./dto";
+import { CreateUserDto, ResetPasswordDto, SendTwoFactorDto, SignInDto, UpdateProfileDto, VerifyTwoFactorDto } from "./dto";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 
 export class AuthController {
@@ -156,5 +156,13 @@ export class AuthController {
     }
 
     return res.status(200).json({ msg: "PASSWORD_UPDATE" });
+  };
+
+  public updateProfile = async (req: TRequest<UpdateProfileDto>, res: TResponse) => {
+    const { email, name, number, password, address, is2FAEnabled } = req.dto as UpdateProfileDto;
+    const hashpassword = await Bcrypt.hash(password);
+
+    await this.userRepository.update({ id: Number(req.me.id) }, { email, name, password: hashpassword, number, address, is2FAEnabled });
+    return res.status(200).json({ msg: "PROFILE_UPDATED" });
   };
 }
