@@ -11,11 +11,11 @@ export class OrderRouter extends SFRouter implements RouterDelegates {
   private authMiddleware: AuthMiddleware;
 
   initRoutes(): void {
-    this.router.post("/:productId", this.authMiddleware.auth, this.orderController.placeOrder);
+    this.router.post("/", this.authMiddleware.auth, this.orderController.placeOrder);
     this.router.get("/", this.authMiddleware.auth, this.orderController.pastOrder);
-    this.router.get("/:orderId",this.authMiddleware.auth,this.orderController.getDetails);
-    this.router.get("/order-status/:orderId",this.authMiddleware.auth,this.orderController.getOrderStatus)
-    this.router.put("/cancel-order/:orderId",this.authMiddleware.auth,this.orderController.cancelOrder)
-    this.router.put("/update-order-status/:orderId",this.authMiddleware.auth,this.authMiddleware.isAdmin,this.orderController.updateStatus)
+    this.router.get("/:orderId", this.authMiddleware.auth, this.orderController.getDetails);
+    this.router.get("/order-status/:orderId", this.authMiddleware.auth, this.orderController.getOrderStatus);
+    this.router.put("/cancel-order/:orderId", this.authMiddleware.auth, this.orderController.cancelOrder);
+    this.router.put("/update-order-status/:orderId", this.authMiddleware.auth, this.authMiddleware.isAdmin, this.orderController.updateStatus);
   }
 }

@@ -1,15 +1,11 @@
 import { PaymentMethod, Status } from "@types";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { ProductEntity } from "./product.entity";
 import { UserEntity } from "./user.entity";
 
-@Entity("order")
+@Entity("orders")
 export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ type: "int", nullable: false })
-  productId: number;
 
   @Column({ type: "int", nullable: false })
   userId: number;
@@ -30,11 +26,7 @@ export class OrderEntity {
   @Column({ type: "boolean", default: 0 })
   cancleFlag: boolean;
 
-  @ManyToOne(() => ProductEntity, product => product.cart)
-  @JoinColumn({ name: "productId" })
-  product: ProductEntity;
-
-  @ManyToOne(() => UserEntity, user => user.cart)
+  @ManyToOne(() => UserEntity, user => user.order)
   @JoinColumn({ name: "userId" })
   user: UserEntity;
 
