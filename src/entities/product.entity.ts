@@ -1,5 +1,6 @@
 import { Category } from "@types";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { CartEntity } from "./cart.entity";
 import { ReviewEntity } from "./review.entity";
 
 @Entity("product")
@@ -36,4 +37,7 @@ export class ProductEntity {
 
   @OneToMany(() => ReviewEntity, review => review.product)
   reviews: ReviewEntity[];
+
+  @ManyToOne(() => CartEntity, cart => cart.product)
+  cart: CartEntity[];
 }

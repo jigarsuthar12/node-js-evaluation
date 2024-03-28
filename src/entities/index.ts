@@ -1,3 +1,4 @@
+export * from "./cart.entity";
 export * from "./product.entity";
 export * from "./reset-password-request.entity";
 export * from "./review.entity";
