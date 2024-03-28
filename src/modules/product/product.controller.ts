@@ -44,15 +44,17 @@ export class ProductController {
   public getDetails = async (req: TRequest, res: TResponse) => {
     const { productId } = req.params;
     const product = await this.productRepository.findOne({ where: { id: Number(productId) } });
-    const review = await this.reviewRepository.find({ where: { productId: product.id } });
+    const reviews = await this.reviewRepository.find({ where: { productId: product.id } });
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+    const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
 
     const updatedReview = await Promise.all(
-      review.map(async item => {
+      reviews.map(async item => {
         const user = await this.userRepository.findOne({ where: { id: item.userId } });
         return { ...item, username: user.name };
       }),
     );
-    return res.status(200).json({ msg: "PRODUCT_DETAIL", ...product, reviews: updatedReview });
+    return res.status(200).json({ msg: "PRODUCT_DETAIL", ...product, reviews: updatedReview, avgRating });
   };
 
   public getTrendingList = async (req: TRequest, res: TResponse) => {
@@ -65,13 +67,15 @@ export class ProductController {
     const updatedProducts = await Promise.all(
       products.map(async item => {
         const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+        const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
         const updatedReviews = await Promise.all(
           reviews.map(async reviewItem => {
             const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
             return { ...reviewItem, username: user.name };
           }),
         );
-        return { ...item, reviews: updatedReviews };
+        return { ...item, reviews: updatedReviews, avgRating };
       }),
     );
     return res.status(200).json({ msg: "TRENDING ITEMS", updatedProducts });
@@ -86,13 +90,15 @@ export class ProductController {
       const updatedProducts = await Promise.all(
         products.map(async item => {
           const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+          const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+          const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
           const updatedReviews = await Promise.all(
             reviews.map(async reviewItem => {
               const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
               return { ...reviewItem, username: user.name };
             }),
           );
-          return { ...item, reviews: updatedReviews };
+          return { ...item, reviews: updatedReviews, avgRating };
         }),
       );
       return res.status(200).json({ msg: "ALL PRODUCTS", updatedProducts });
@@ -134,13 +140,17 @@ export class ProductController {
     const updatedProducts = await Promise.all(
       products.map(async item => {
         const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
+
+        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+        const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+
         const updatedReviews = await Promise.all(
           reviews.map(async reviewItem => {
             const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
             return { ...reviewItem, username: user.name };
           }),
         );
-        return { ...item, reviews: updatedReviews };
+        return { ...item, reviews: updatedReviews, avgRating };
       }),
     );
 
