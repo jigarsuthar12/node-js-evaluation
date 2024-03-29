@@ -36,6 +36,9 @@ export class OrderController {
 
   public pastOrder = async (req: TRequest, res: TResponse) => {
     const orders = await this.orderRepository.find({ where: { userId: req.me.id } });
+    if (!orders) {
+      return res.status(404).json({ msg: "YOU_HAVE_NO_ORDERS" });
+    }
     const mappedOrders = await Promise.all(
       orders.map(async item => {
         const orderItems = await this.orderItemRepository.find({ where: { orderId: item.id } });
@@ -71,7 +74,7 @@ export class OrderController {
     const placeOrderCart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
     const placeOrderItems = await this.cartItemRepository.find({ where: { cartId: placeOrderCart.id } });
 
-    const order = await this.orderRepository.create({ userId: 1 });
+    const order = await this.orderRepository.create({ userId: req.me.id });
     await this.orderRepository.save(order);
 
     await Promise.all(

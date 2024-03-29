@@ -44,6 +44,9 @@ export class ProductController {
   public getDetails = async (req: TRequest, res: TResponse) => {
     const { productId } = req.params;
     const product = await this.productRepository.findOne({ where: { id: Number(productId) } });
+    if (!product) {
+      return res.status(404).json({ msg: "CAN_NOT_GET_ANY_PRODUCT" });
+    }
     const reviews = await this.reviewRepository.find({ where: { productId: product.id } });
     const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
     const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;

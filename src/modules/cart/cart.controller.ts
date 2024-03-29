@@ -29,6 +29,9 @@ export class CartController {
 
   public get = async (req: TRequest, res: TResponse) => {
     const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
+    if (!cart) {
+      return res.status(404).json({ msg: "CAN_NOT_GET_ANY_CART" });
+    }
     const cartItems = await this.cartItemRepository.find({ where: { cartId: cart.id } });
     const mappedCartItems = await Promise.all(
       cartItems.map(async item => {
@@ -87,7 +90,9 @@ export class CartController {
   public deleteFromCart = async (req: TRequest, res: TResponse) => {
     const { productId } = req.params as ReviewParams;
     const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
-
+    if (!cart) {
+      return res.status(404).json({ msg: "CAN_NOT_GET_YOUR_CART" });
+    }
     const cartItem = await this.cartItemRepository.findOne({ where: { cartId: cart.id, productId } });
     if (cartItem.quantity) {
       cartItem.quantity -= 1;
