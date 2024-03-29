@@ -59,7 +59,7 @@ export class OrderController {
                 return { ...productItem, reviews: updatedReviews, avgRating };
               }),
             );
-            return { product: mappedProducts };
+            return { quantity: orderItem.quantity, product: mappedProducts };
           }),
         );
 
@@ -91,6 +91,9 @@ export class OrderController {
   public getDetails = async (req: TRequest, res: TResponse) => {
     const { orderId } = req.params as ReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
+    if (!order) {
+      return res.status(404).json({ msg: "Client Side error wrong orderId" });
+    }
     const orderItems = await this.orderItemRepository.find({ where: { orderId: order.id } });
 
     const allProducts = await Promise.all(
@@ -117,12 +120,20 @@ export class OrderController {
 
   public getOrderStatus = async (req: TRequest, res: TResponse) => {
     const { orderId } = req.params as ReviewParams;
+    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    if (!order) {
+      return res.status(404).json({ msg: "Client Side error wrong orderId" });
+    }
     const orderStatus = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
     return res.status(200).json({ msg: "ORDER_STATUS", status: orderStatus.status });
   };
 
   public cancelOrder = async (req: TRequest, res: TResponse) => {
     const { orderId } = req.params as ReviewParams;
+    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    if (!order) {
+      return res.status(404).json({ msg: "Client Side error wrong orderId" });
+    }
     await this.orderRepository.update({ id: Number(orderId), userId: req.me.id }, { cancleFlag: true });
     await this.orderRepository.update({ id: Number(orderId) }, { status: Status.CANCELLED });
     return res.status(200).json({ msg: "ORDER_CANCELLED!!" });
@@ -130,6 +141,10 @@ export class OrderController {
 
   public updateStatus = async (req: TRequest, res: TResponse) => {
     const { orderId } = req.params as ReviewParams;
+    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    if (!order) {
+      return res.status(404).json({ msg: "Client Side error wrong orderId" });
+    }
     await this.orderRepository.update({ id: Number(orderId) }, { status: Status.PROCESSING });
 
     return res.status(200).json({ msg: "STATUS_UPDATED" });
