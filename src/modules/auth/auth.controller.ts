@@ -22,8 +22,21 @@ export class AuthController {
   }
 
   public create = async (req: TRequest<CreateUserDto>, res: TResponse) => {
-    req.dto.password = await Bcrypt.hash(req.dto.password);
-    const user = await this.userRepository.create(req.dto);
+    const { email, name, number, password, address, is2FAEnabled, userType } = req.dto as CreateUserDto;
+
+    const findEmail = await this.userRepository.findOne({ where: { email } });
+    if (findEmail) {
+      return res.status(404).json({ msg: "CAN_NOT_ENTER_DUPLICATE_EMAIL" });
+    }
+
+    const findNumber = await this.userRepository.findOne({ where: { number } });
+    if (findNumber) {
+      return res.status(404).json({ msg: "CAN_NOT_ENTER_DUPLICATE_NUMBER" });
+    }
+
+    const hashpassword = await Bcrypt.hash(password);
+
+    const user = await this.userRepository.create({ email, name, number, password: hashpassword, address, is2FAEnabled, userType });
     await this.userRepository.save(user);
 
     return res.status(201).json({ msg: "USER_CREATED" });
@@ -160,6 +173,19 @@ export class AuthController {
 
   public updateProfile = async (req: TRequest<UpdateProfileDto>, res: TResponse) => {
     const { email, name, number, password, address, is2FAEnabled } = req.dto as UpdateProfileDto;
+
+    if (email) {
+      const findEmail = await this.userRepository.findOne({ where: { email } });
+      if (findEmail) {
+        return res.status(404).json({ msg: "CAN_NOT_ENTER_DUPLICATE_EMAIL" });
+      }
+    }
+    if (number) {
+      const findNumber = await this.userRepository.findOne({ where: { number } });
+      if (findNumber) {
+        return res.status(404).json({ msg: "CAN_NOT_ENTER_DUPLICATE_NUMBER" });
+      }
+    }
     if (password) {
       const hashpassword = await Bcrypt.hash(password);
       await this.userRepository.update({ id: Number(req.me.id) }, { email, name, password: hashpassword, number, address, is2FAEnabled });
