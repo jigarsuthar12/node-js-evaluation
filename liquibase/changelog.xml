@@ -131,7 +131,7 @@
             <column name="updatedAt" type="datetime" defaultValueComputed="now()"/>
         </createTable>
     </changeSet>
-    <changeSet id="10" author="jigar">
+    <changeSet id="24" author="jigar">
         <createTable tableName="order">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -183,12 +183,12 @@
             <column name="quantity" type="INT"/>
         </addColumn>
     </changeSet>
-     <changeSet author="jigar" id="15">
+     <changeSet author="jigar" id="26">
         <dropForeignKeyConstraint
             baseTableName="order"
             constraintName="fk_order_product"/>
     </changeSet>
-    <changeSet author="jigar" id="16">
+    <changeSet author="jigar" id="27">
         <dropColumn tableName="order" columnName="productId"/>
     </changeSet>
     <changeSet author="jigar" id="17">
@@ -208,11 +208,41 @@
         </createTable>
     </changeSet>
     
-        <changeSet  author="liquibase-docs"  id="renameTable-example">
+        <changeSet  author="liquibase-docs"  id="renameTable">
         <renameTable  catalogName="evaluation"
             newTableName="orders"
             oldTableName="order"
             />
   
     </changeSet>
+    <changeSet author="jigar" id="18">
+    <addDefaultValue
+        tableName="cartItem"
+        columnName="quantity"
+        columnDataType="INT"
+        defaultValueNumeric="1"/>
+    </changeSet>
+    <changeSet author="jigar" id="19">
+         <addDefaultValue
+        tableName="orderItem"
+        columnName="quantity"
+        columnDataType="INT"
+        defaultValueNumeric="1"/>
+    </changeSet>
+
+    <changeSet id="20" author="jigar">
+    <dropForeignKeyConstraint
+        baseTableName="cartItem"
+        constraintName="fk_cartItem_cart"/>
+        
+    <addForeignKeyConstraint
+        baseColumnNames="cartId"
+        baseTableName="cartItem"
+        constraintName="fk_cartItem_cart_id"
+        referencedColumnNames="id"
+        referencedTableName="cart"
+        onDelete="CASCADE"/>
+    </changeSet>
+   
+
 </databaseChangeLog>

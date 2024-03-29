@@ -13,7 +13,7 @@ export class OrderItemEntity {
   @Column({ type: "int", nullable: false })
   orderId: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, default: 1 })
   quantity: number;
 
   @ManyToOne(() => ProductEntity, product => product.orderItem)
