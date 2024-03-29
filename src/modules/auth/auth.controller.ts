@@ -1,6 +1,6 @@
 import { Constants } from "@configs";
 import { ResetPasswordRequestEntity, TwoFactorAuthRequestEntity, UserEntity } from "@entities";
-import { Bcrypt, GenerateOTP, InitRepository, InjectRepositories, JwtHelper, Notification } from "@helpers";
+import { Bcrypt, GenerateOTP, InitRepository, InjectRepositories, JwtHelper, Log, Notification } from "@helpers";
 import { TRequest, TResponse } from "@types";
 import moment from "moment";
 import { MoreThanOrEqual, Repository } from "typeorm";
@@ -21,6 +21,8 @@ export class AuthController {
     InjectRepositories(this);
   }
 
+  private logger = Log.getLogger();
+
   public create = async (req: TRequest<CreateUserDto>, res: TResponse) => {
     req.dto.password = await Bcrypt.hash(req.dto.password);
     const user = await this.userRepository.create(req.dto);
@@ -34,7 +36,7 @@ export class AuthController {
 
     const user = await this.userRepository.findOne({
       where: [{ email }, { number }],
-      select: ["email", "id", "number", "password", "name", "userType"],
+      select: ["email", "id", "number", "password", "name", "userType", "is2FAEnabled"],
     });
 
     if (!user) {
@@ -46,7 +48,16 @@ export class AuthController {
     if (!compare) {
       return res.status(400).json({ error: "Please check your password!" });
     }
+    if (user.is2FAEnabled === true) {
+      const otp = GenerateOTP.generate();
+      const hashOTP = await Bcrypt.hash(otp.toString());
 
+      const twoFactorAuth = await this.twoFactorAuthRequestEntity.create({ userId: user.id, hashCode: hashOTP });
+      await this.twoFactorAuthRequestEntity.save(twoFactorAuth);
+
+      const message = `Use this OTP: ${otp} for 2FA authentication. Keep it secret and don't share it with anyone.`;
+      await Notification.email("sign-in", message, [user.email]);
+    }
     const token = JwtHelper.encode({ id: user.id });
     return res.status(200).json({ token });
   };
@@ -66,7 +77,7 @@ export class AuthController {
     const message = `Use this OTP: ${otp} for 2FA authentication. Keep it secret and don't share it with anyone.`;
 
     try {
-      await Notification.email("sign-in", message, [user.email]);
+      await Notification.email("ENABLE 2FA", message, [user.email]);
 
       return res.status(200).json({ msg: "2FA_SENT" });
     } catch (err) {
