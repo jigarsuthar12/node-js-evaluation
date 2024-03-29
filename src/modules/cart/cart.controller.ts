@@ -1,7 +1,6 @@
-import { CartEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
+import { CartEntity, CartItemEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories } from "@helpers";
 import { TRequest, TResponse } from "@types";
-import { CartItemEntity } from "entities/cartItem.entity";
 import { Repository } from "typeorm";
 
 interface ReviewParams {

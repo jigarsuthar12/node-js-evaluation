@@ -1,14 +1,20 @@
 import { env } from "@configs";
-import { ProductEntity, ResetPasswordRequestEntity, TwoFactorAuthRequestEntity, UserEntity } from "@entities";
+import {
+  CartEntity,
+  CartItemEntity,
+  OrderEntity,
+  OrderItemEntity,
+  ProductEntity,
+  ResetPasswordRequestEntity,
+  ReviewEntity,
+  TwoFactorAuthRequestEntity,
+  UserEntity,
+} from "@entities";
 import { HandleUnhandledPromise } from "@helpers";
 import { json, urlencoded } from "body-parser";
 import compression from "compression";
 import { DB } from "configs/db";
 import dotenv from "dotenv";
-import { CartEntity } from "entities/cart.entity";
-import { CartItemEntity } from "entities/cartItem.entity";
-import { OrderEntity } from "entities/order.entity";
-import { ReviewEntity } from "entities/review.entity";
 import express from "express";
 import helmet from "helmet";
 import { EnvValidator } from "helpers/env-validator.helper";
@@ -34,7 +40,7 @@ export default class App {
       username: env.dbUser,
       password: env.dbPassword,
       database: env.dbName,
-      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity, ProductEntity, CartEntity, ReviewEntity, OrderEntity, CartItemEntity],
+      entities: [UserEntity, TwoFactorAuthRequestEntity, ResetPasswordRequestEntity, ProductEntity, CartEntity, ReviewEntity, OrderEntity, CartItemEntity, OrderItemEntity],
     });
 
     // Handle Unhandled Promise Rejections
