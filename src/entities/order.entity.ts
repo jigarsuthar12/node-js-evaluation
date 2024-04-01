@@ -1,4 +1,4 @@
-import { PaymentMethod, Status } from "@types";
+import { EPaymentMethod, EStatus } from "@types";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UserEntity } from "./user.entity";
 
@@ -12,16 +12,16 @@ export class OrderEntity {
 
   @Column({
     type: "enum",
-    enum: PaymentMethod,
+    enum: EPaymentMethod,
   })
-  paymentMethod: PaymentMethod;
+  paymentMethod: EPaymentMethod;
 
   @Column({
     type: "enum",
-    enum: Status,
-    default: Status.PENDING,
+    enum: EStatus,
+    default: EStatus.PENDING,
   })
-  status: Status;
+  status: EStatus;
 
   @Column({ type: "boolean", default: 0 })
   cancleFlag: boolean;

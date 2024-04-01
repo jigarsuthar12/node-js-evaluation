@@ -1,5 +1,5 @@
 import { Constants } from "@configs";
-import { Category } from "@types";
+import { ECategory } from "@types";
 import { IsEnum, IsInt, IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
 
 export class UpdateProductDto {
@@ -27,6 +27,6 @@ export class UpdateProductDto {
 
   @IsString()
   @IsOptional()
-  @IsEnum(Category)
-  category: Category;
+  @IsEnum(ECategory)
+  category: ECategory;
 }

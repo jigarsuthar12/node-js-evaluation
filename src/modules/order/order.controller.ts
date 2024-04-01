@@ -1,9 +1,9 @@
 import { CartEntity, CartItemEntity, OrderEntity, OrderItemEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories } from "@helpers";
-import { Status, TRequest, TResponse } from "@types";
+import { EStatus, TRequest, TResponse } from "@types";
 import { Repository } from "typeorm";
 
-interface ReviewParams {
+interface IReviewParams {
   productId?: number;
   orderId?: number;
 }
@@ -89,7 +89,7 @@ export class OrderController {
   };
 
   public getDetails = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
@@ -119,7 +119,7 @@ export class OrderController {
   };
 
   public getOrderStatus = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
@@ -129,23 +129,23 @@ export class OrderController {
   };
 
   public cancelOrder = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
     }
     await this.orderRepository.update({ id: Number(orderId), userId: req.me.id }, { cancleFlag: true });
-    await this.orderRepository.update({ id: Number(orderId) }, { status: Status.CANCELLED });
+    await this.orderRepository.update({ id: Number(orderId) }, { status: EStatus.CANCELLED });
     return res.status(200).json({ msg: "ORDER_CANCELLED!!" });
   };
 
   public updateStatus = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
     }
-    await this.orderRepository.update({ id: Number(orderId) }, { status: Status.PROCESSING });
+    await this.orderRepository.update({ id: Number(orderId) }, { status: EStatus.PROCESSING });
 
     return res.status(200).json({ msg: "STATUS_UPDATED" });
   };
