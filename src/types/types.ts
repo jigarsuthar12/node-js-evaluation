@@ -35,7 +35,7 @@ export interface TRequest<T = any> extends Request {
 
 export interface TResponse extends Response {}
 
-export enum Category {
+export enum ECategory {
   MOBILE = "Mobile",
   COMPUTER = "Computer",
   BOOKS = "Books",
@@ -43,7 +43,7 @@ export enum Category {
   GROCERY = "Grocery",
 }
 
-export enum Status {
+export enum EStatus {
   PENDING = "Pending",
   DELIEVERED = "Delivered",
   CANCELLED = "Cancelled",
@@ -51,7 +51,7 @@ export enum Status {
   PROCESSING = "Processing",
 }
 
-export enum PaymentMethod {
+export enum EPaymentMethod {
   CREDITCARD = "Credit Card",
   DEBITCARD = "Debit Card",
   PAYPAL = "PayPal",

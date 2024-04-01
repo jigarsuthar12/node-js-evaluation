@@ -1,4 +1,4 @@
-import { Category } from "@types";
+import { ECategory } from "@types";
 import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { CartItemEntity } from "./cartItem.entity";
 import { OrderItemEntity } from "./orderItem.entity";
@@ -26,9 +26,9 @@ export class ProductEntity {
 
   @Column({
     type: "enum",
-    enum: Category,
+    enum: ECategory,
   })
-  category: Category;
+  category: ECategory;
 
   @CreateDateColumn()
   createdAt: Date;

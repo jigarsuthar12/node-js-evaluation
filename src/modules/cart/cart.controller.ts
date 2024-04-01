@@ -3,7 +3,7 @@ import { InitRepository, InjectRepositories } from "@helpers";
 import { TRequest, TResponse } from "@types";
 import { Repository } from "typeorm";
 
-interface ReviewParams {
+interface IReviewParams {
   productId?: number;
 }
 
@@ -62,7 +62,7 @@ export class CartController {
   };
 
   public create = async (req: TRequest, res: TResponse) => {
-    const { productId } = req.params as ReviewParams;
+    const { productId } = req.params as IReviewParams;
 
     const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
     if (!cart) {
@@ -88,7 +88,7 @@ export class CartController {
   };
 
   public deleteFromCart = async (req: TRequest, res: TResponse) => {
-    const { productId } = req.params as ReviewParams;
+    const { productId } = req.params as IReviewParams;
     const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
     if (!cart) {
       return res.status(404).json({ msg: "CAN_NOT_GET_YOUR_CART" });
