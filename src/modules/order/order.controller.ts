@@ -1,3 +1,4 @@
+import { env } from "@configs";
 import { CartEntity, CartItemEntity, OrderEntity, OrderItemEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories, Log } from "@helpers";
 import { EStatus, TRequest, TResponse } from "@types";
@@ -6,8 +7,8 @@ import Stripe from "stripe";
 import { Repository } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 
-const stripe = new Stripe("sk_test_51OmF3lSHazoMtA3eZ5dpyqtYUlN6Au5Obw3PM12CH01cffI0bYEszS19ObQRLfgqs0V2HBrZFisqRugJbr20uppE00JJopejYU");
-const endpointSecret = "whsec_dixjM5cXgpUrSqggT0eSzgKvyHXN3sHn";
+const stripe = new Stripe(env.secretKey);
+const endpointSecret = env.endPointSecret;
 interface IReviewParams {
   productId?: number;
   orderId?: number;
@@ -15,7 +16,7 @@ interface IReviewParams {
 
 export class OrderController {
   @InitRepository(ProductEntity)
-  productRepository: Repository<ProductEntity>;
+productRepository: Repository<ProductEntity>;
 
   @InitRepository(ReviewEntity)
   reviewRepository: Repository<ReviewEntity>;
@@ -97,6 +98,8 @@ export class OrderController {
       {
         amount: payment * 100,
         currency: "INR",
+        payment_method_types: ["card"],
+        payment_method: "pm_card_visa",
       },
       {
         idempotencyKey: uuid,
