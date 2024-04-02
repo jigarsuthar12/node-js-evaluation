@@ -10,6 +10,12 @@ export class OrderEntity {
   @Column({ type: "int", nullable: false })
   userId: number;
 
+  @Column({ type: "uuid", nullable: true })
+  paymentKey: string;
+
+  @Column({ type: "json", nullable: true })
+  paymentMetadata: object;
+
   @Column({
     type: "enum",
     enum: PaymentMethod,

@@ -59,7 +59,7 @@ export default class App {
 
     // Enable DELETE and PUT
     this.app.use(methodOverride());
-
+    this.app.use("/order/webhook", express.raw({ type: "application/json" }));
     // Body Parsing
     this.app.use(json({ limit: "50mb" }));
     this.app.use(urlencoded({ extended: true })); // parse application/x-www-form-urlencoded

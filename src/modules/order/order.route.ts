@@ -1,6 +1,7 @@
 import { InjectCls, SFRouter } from "@helpers";
 import { AuthMiddleware } from "@middlewares";
 import { RouterDelegates } from "@types";
+import express from "express";
 import { OrderController } from "./order.controller";
 
 export class OrderRouter extends SFRouter implements RouterDelegates {
@@ -12,6 +13,7 @@ export class OrderRouter extends SFRouter implements RouterDelegates {
 
   initRoutes(): void {
     this.router.post("/", this.authMiddleware.auth, this.orderController.placeOrder);
+    this.router.post("/webhook", express.raw({ type: "application/json" }), this.orderController.webhook);
     this.router.get("/", this.authMiddleware.auth, this.orderController.pastOrder);
     this.router.get("/:orderId", this.authMiddleware.auth, this.orderController.getDetails);
     this.router.get("/order-status/:orderId", this.authMiddleware.auth, this.orderController.getOrderStatus);
