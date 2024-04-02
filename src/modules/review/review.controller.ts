@@ -4,7 +4,7 @@ import { ReviewEntity } from "entities/review.entity";
 import { Repository } from "typeorm";
 import { CreateReviewDto } from "./dto";
 
-interface ReviewQueryParams {
+interface IReviewQueryParams {
   productId?: number;
 }
 
@@ -18,7 +18,7 @@ export class ReviewController {
 
   public create = async (req: TRequest<CreateReviewDto>, res: TResponse) => {
     const { rating, description } = req.dto as CreateReviewDto;
-    const { productId } = req.params as ReviewQueryParams;
+    const { productId } = req.params as IReviewQueryParams;
 
     const review = this.reviewRepository.create({ description, rating, productId: Number(productId), userId: req.me.id });
     await this.reviewRepository.save(review);

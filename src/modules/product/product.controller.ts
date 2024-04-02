@@ -1,13 +1,13 @@
 import { ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories } from "@helpers";
-import { Category, TRequest, TResponse } from "@types";
+import { ECategory, TRequest, TResponse } from "@types";
 import { Between, FindOperator, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from "typeorm";
 import { CreateProductDto, UpdateProductDto } from "./dto";
 
-interface ProductQueryParams {
+interface IProductQueryParams {
   allProducts?: string;
   name?: string;
-  category?: Category;
+  category?: ECategory;
   minPrice?: number;
   maxPrice?: number;
   discount?: string;
@@ -16,12 +16,12 @@ interface ProductQueryParams {
   sortBy?: "priceLowToHigh" | "priceHighToLow" | "name";
 }
 
-type WhereClause<T> = Partial<{
+type TWhereClause<T> = Partial<{
   [K in keyof T]: T[K] | FindOperator<T[K]>;
 }>;
 
-type Product = {
-  category?: Category;
+type TProduct = {
+  category?: ECategory;
   name?: string;
   price?: number;
   rating?: number;
@@ -85,9 +85,9 @@ export class ProductController {
   };
 
   public get = async (req: TRequest, res: TResponse) => {
-    const { allProducts, name, category, minPrice, maxPrice, sortBy, minRating, maxRating, discount } = req.query as ProductQueryParams;
+    const { allProducts, name, category, minPrice, maxPrice, sortBy, minRating, maxRating, discount } = req.query as IProductQueryParams;
 
-    const where: WhereClause<Product> = {};
+    const where: TWhereClause<TProduct> = {};
     if (allProducts === "true") {
       const products = await this.productRepository.find();
       const updatedProducts = await Promise.all(

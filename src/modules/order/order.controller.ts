@@ -1,6 +1,6 @@
 import { CartEntity, CartItemEntity, OrderEntity, OrderItemEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
 import { InitRepository, InjectRepositories, Log } from "@helpers";
-import { Status, TRequest, TResponse } from "@types";
+import { EStatus, TRequest, TResponse } from "@types";
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { Repository } from "typeorm";
@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const stripe = new Stripe("sk_test_51OmF3lSHazoMtA3eZ5dpyqtYUlN6Au5Obw3PM12CH01cffI0bYEszS19ObQRLfgqs0V2HBrZFisqRugJbr20uppE00JJopejYU");
 const endpointSecret = "whsec_dixjM5cXgpUrSqggT0eSzgKvyHXN3sHn";
-interface ReviewParams {
+interface IReviewParams {
   productId?: number;
   orderId?: number;
 }
@@ -81,7 +81,7 @@ export class OrderController {
     const placeOrderCart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
     const placeOrderItems = await this.cartItemRepository.find({ where: { cartId: placeOrderCart.id } });
 
-    const order = await this.orderRepository.create({ userId: req.me.id, status: Status.PROCESSING });
+    const order = await this.orderRepository.create({ userId: req.me.id, status: EStatus.PROCESSING });
     await this.orderRepository.save(order);
 
     const result = await this.cartItemRepository
@@ -116,7 +116,7 @@ export class OrderController {
   };
 
   public getDetails = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
@@ -146,7 +146,7 @@ export class OrderController {
   };
 
   public getOrderStatus = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
@@ -156,23 +156,23 @@ export class OrderController {
   };
 
   public cancelOrder = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
     }
     await this.orderRepository.update({ id: Number(orderId), userId: req.me.id }, { cancleFlag: true });
-    await this.orderRepository.update({ id: Number(orderId) }, { status: Status.CANCELLED });
+    await this.orderRepository.update({ id: Number(orderId) }, { status: EStatus.CANCELLED });
     return res.status(200).json({ msg: "ORDER_CANCELLED!!" });
   };
 
   public updateStatus = async (req: TRequest, res: TResponse) => {
-    const { orderId } = req.params as ReviewParams;
+    const { orderId } = req.params as IReviewParams;
     const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
       return res.status(404).json({ msg: "Client Side error wrong orderId" });
     }
-    await this.orderRepository.update({ id: Number(orderId) }, { status: Status.PROCESSING });
+    await this.orderRepository.update({ id: Number(orderId) }, { status: EStatus.PROCESSING });
 
     return res.status(200).json({ msg: "STATUS_UPDATED" });
   };
@@ -191,7 +191,7 @@ export class OrderController {
     if (event.type === "payment_intent.created") {
       const paymentIntent = event.data.object;
       this.logger.info(`Payment intent created: ${paymentIntent}`);
-      await this.orderRepository.update({ paymentKey: event.request.idempotency_key }, { paymentMetadata: paymentIntent, status: Status.SHIPPED });
+      await this.orderRepository.update({ paymentKey: event.request.idempotency_key }, { paymentMetadata: paymentIntent, status: EStatus.SHIPPED });
       return res.status(200).json({ msg: "payment is created!" });
     }
     if (event.type === "payment_intent.payment_failed") {
