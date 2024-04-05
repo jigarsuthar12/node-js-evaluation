@@ -32,33 +32,28 @@ export class CartController {
     if (!cart) {
       return res.status(404).json({ msg: "CAN_NOT_GET_ANY_CART" });
     }
-    const cartItems = await this.cartItemRepository.find({ where: { cartId: cart.id } });
-    const mappedCartItems = await Promise.all(
-      cartItems.map(async item => {
-        const product = await this.productRepository.find({
-          where: { id: item.productId },
-        });
-        const updatedProduct = await Promise.all(
-          product.map(async productItem => {
-            const reviews = await this.reviewRepository.find({ where: { productId: productItem.id } });
-            const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-            const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
 
-            const updatedReviews = await Promise.all(
-              reviews.map(async reviewItem => {
-                const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
-                return { ...reviewItem, username: user.name };
-              }),
-            );
-            return { ...productItem, reviews: updatedReviews, avgRating };
-          }),
-        );
+    const cartItems = await this.cartItemRepository.find({
+      relations: {
+        product: {
+          reviews: {
+            user: true,
+          },
+        },
+      },
+    });
 
-        return { ...item, product: updatedProduct };
-      }),
-    );
-    const user = await this.userRepository.findOne({ where: { id: req.me.id } });
-    return res.status(200).json({ msg: "GOT_CART_ITEMS", Cart: mappedCartItems, username: user.name });
+    const mappedCartItems = cartItems.map(item => {
+      const mappedProduct = item.product.reviews;
+      const avgRating = mappedProduct.length > 0 ? mappedProduct.reduce((acc, review) => acc + review.rating, 0) / item.product.reviews.length : 0;
+
+      return { ...item, avgRating };
+    });
+
+    if (!cart) {
+      return res.status(404).json({ msg: "CAN_NOT_GET_ANY_CART" });
+    }
+    return res.status(200).json({ msg: "GOT_CART_ITEMS", Cart: mappedCartItems });
   };
 
   public create = async (req: TRequest, res: TResponse) => {

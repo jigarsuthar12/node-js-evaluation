@@ -35,39 +35,40 @@ export class OrderController {
   }
 
   public pastOrder = async (req: TRequest, res: TResponse) => {
-    const orders = await this.orderRepository.find({ where: { userId: req.me.id } });
+    const orders = await this.orderRepository.find({
+      relations: {
+        orderItem: {
+          product: {
+            reviews: {
+              user: true,
+            },
+          },
+        },
+      },
+      where: { userId: req.me.id },
+    });
     if (!orders) {
       return res.status(404).json({ msg: "YOU_HAVE_NO_ORDERS" });
     }
-    const mappedOrders = await Promise.all(
-      orders.map(async item => {
-        const orderItems = await this.orderItemRepository.find({ where: { orderId: item.id } });
-        const allProducts = await Promise.all(
-          orderItems.map(async orderItem => {
-            const products = await this.productRepository.find({ where: { id: orderItem.productId } });
-            const mappedProducts = await Promise.all(
-              products.map(async productItem => {
-                const reviews = await this.reviewRepository.find({ where: { productId: productItem.id } });
-                const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-                const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
-                const updatedReviews = await Promise.all(
-                  reviews.map(async reviewItem => {
-                    const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
-                    return { ...reviewItem, username: user.name };
-                  }),
-                );
-                return { ...productItem, reviews: updatedReviews, avgRating };
-              }),
-            );
-            return { quantity: orderItem.quantity, product: mappedProducts };
-          }),
-        );
+    // Calculate average rating for each product with reviews
+    const productsWithAvgRating = orders.map(item => {
+      if (!item.orderItem[0].product || !item.orderItem[0].product.reviews || item.orderItem[0].product.reviews.length === 0) {
+        return { ...item.orderItem[0], product: { ...item.orderItem[0].product, avgRating: null } };
+      }
 
-        return { ...item, allProducts };
-      }),
-    );
-    const user = await this.userRepository.findOne({ where: { id: req.me.id } });
-    return res.status(200).json({ msg: "ALL ORDERS", Orders: mappedOrders, username: user.name });
+      const totalRating = item.orderItem[0].product.reviews.reduce((acc, review) => acc + review.rating, 0);
+      const avgRating = totalRating / item.orderItem[0].product.reviews.length;
+
+      return {
+        ...item.orderItem[0],
+        product: {
+          ...item.orderItem[0].product,
+          avgRating: parseFloat(avgRating.toFixed(1)),
+        },
+      };
+    });
+
+    return res.status(200).json({ msg: "ALl_ORDERS", pastOrders: productsWithAvgRating });
   };
 
   public placeOrder = async (req: TRequest, res: TResponse) => {
@@ -90,32 +91,40 @@ export class OrderController {
 
   public getDetails = async (req: TRequest, res: TResponse) => {
     const { orderId } = req.params as IReviewParams;
-    const order = await this.orderRepository.findOne({ where: { id: orderId, userId: req.me.id } });
-    if (!order) {
-      return res.status(404).json({ msg: "Client Side error wrong orderId" });
-    }
-    const orderItems = await this.orderItemRepository.find({ where: { orderId: order.id } });
 
-    const allProducts = await Promise.all(
-      orderItems.map(async item => {
-        const product = await this.productRepository.findOne({ where: { id: item.productId } });
-        const reviews = await this.reviewRepository.find({ where: { productId: product.id } });
-        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-        const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+    const order = await this.orderRepository.find({ where: { id: orderId, userId: req.me.id } });
+    const orderItem = await this.orderItemRepository.find({
+      relations: {
+        product: {
+          reviews: {
+            user: true,
+          },
+        },
+        order: true,
+      },
+      where: {
+        orderId: order[0].id,
+      },
+    });
 
-        const mapppedReviews = await Promise.all(
-          reviews.map(async mappedreview => {
-            const user = await this.userRepository.findOne({ where: { id: mappedreview.userId } });
-            return { ...item, username: user.name };
-          }),
-        );
+    // Calculate average rating for each product with reviews
+    const productsWithAvgRating = orderItem.map(orderItems => {
+      if (!orderItems.product || !orderItems.product.reviews || orderItems.product.reviews.length === 0) {
+        return { ...orderItems, product: { ...orderItems.product, avgRating: null } };
+      }
 
-        return { ...item, product, review: mapppedReviews, avgRating };
-      }),
-    );
+      const totalRating = orderItems.product.reviews.reduce((acc, review) => acc + review.rating, 0);
+      const avgRating = totalRating / orderItems.product.reviews.length;
 
-    const user = await this.userRepository.findOne({ where: { id: order.userId } });
-    return res.status(200).json({ msg: "GOT_ORDER", ...order, allProducts, username: user.name });
+      return {
+        ...orderItems,
+        product: {
+          ...orderItems.product,
+          avgRating: parseFloat(avgRating.toFixed(1)),
+        },
+      };
+    });
+    return res.status(200).json({ msg: "GOT_ORDER", ...productsWithAvgRating });
   };
 
   public getOrderStatus = async (req: TRequest, res: TResponse) => {

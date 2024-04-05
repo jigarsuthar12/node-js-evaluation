@@ -43,16 +43,15 @@ export class ProductController {
 
   public getDetails = async (req: TRequest, res: TResponse) => {
     const { productId } = req.params;
-    const product = await this.productRepository.findOne({ where: { id: Number(productId) } });
+    const product = await this.productRepository.findOne({ relations: { reviews: { user: true } }, where: { id: Number(productId) } });
     if (!product) {
       return res.status(404).json({ msg: "CAN_NOT_GET_ANY_PRODUCT" });
     }
-    const reviews = await this.reviewRepository.find({ where: { productId: product.id } });
-    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-    const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+    const totalRating = product.reviews.reduce((acc, review) => acc + review.rating, 0);
+    const avgRating = product.reviews.length > 0 ? totalRating / product.reviews.length : 0;
 
     const updatedReview = await Promise.all(
-      reviews.map(async item => {
+      product.reviews.map(async item => {
         const user = await this.userRepository.findOne({ where: { id: item.userId } });
         return { ...item, username: user.name };
       }),
@@ -62,6 +61,11 @@ export class ProductController {
 
   public getTrendingList = async (req: TRequest, res: TResponse) => {
     const products = await this.productRepository.find({
+      relations: {
+        reviews: {
+          user: true,
+        },
+      },
       order: {
         id: "DESC",
       },
@@ -69,16 +73,9 @@ export class ProductController {
     });
     const updatedProducts = await Promise.all(
       products.map(async item => {
-        const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
-        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-        const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
-        const updatedReviews = await Promise.all(
-          reviews.map(async reviewItem => {
-            const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
-            return { ...reviewItem, username: user.name };
-          }),
-        );
-        return { ...item, reviews: updatedReviews, avgRating };
+        const totalRating = item.reviews.reduce((acc, review) => acc + review.rating, 0);
+        const avgRating = item.reviews.length > 0 ? totalRating / item.reviews.length : 0;
+        return { ...item, avgRating };
       }),
     );
     return res.status(200).json({ msg: "TRENDING ITEMS", updatedProducts });
@@ -89,19 +86,17 @@ export class ProductController {
 
     const where: TWhereClause<TProduct> = {};
     if (allProducts === "true") {
-      const products = await this.productRepository.find();
+      const products = await this.productRepository.find({
+        relations: {
+          reviews: { user: true },
+        },
+      });
       const updatedProducts = await Promise.all(
         products.map(async item => {
-          const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
-          const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-          const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
-          const updatedReviews = await Promise.all(
-            reviews.map(async reviewItem => {
-              const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
-              return { ...reviewItem, username: user.name };
-            }),
-          );
-          return { ...item, reviews: updatedReviews, avgRating };
+          const totalRating = item.reviews.reduce((acc, review) => acc + review.rating, 0);
+          const avgRating = item.reviews.length > 0 ? totalRating / item.reviews.length : 0;
+
+          return { ...item, avgRating };
         }),
       );
       return res.status(200).json({ msg: "ALL PRODUCTS", updatedProducts });
@@ -139,54 +134,42 @@ export class ProductController {
     if (discount) {
       where.discount = discount;
     }
-    const products = await this.productRepository.find({ where, order });
+    const products = await this.productRepository.find({ relations: { reviews: { user: true } }, where, order });
     const updatedProducts = await Promise.all(
       products.map(async item => {
-        const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
-
-        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-        const avgRating = reviews.length > 0 ? totalRating / reviews.length : 0;
-
-        const updatedReviews = await Promise.all(
-          reviews.map(async reviewItem => {
-            const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
-            return { ...reviewItem, username: user.name };
-          }),
-        );
-        return { ...item, reviews: updatedReviews, avgRating };
+        const totalRating = item.reviews.reduce((acc, review) => acc + review.rating, 0);
+        const avgRating = item.reviews.length > 0 ? totalRating / item.reviews.length : 0;
+        return { ...item, avgRating };
       }),
     );
 
     if (minRating || maxRating) {
-      const queryBuilder = this.productRepository
-        .createQueryBuilder("product")
-        .leftJoin("product.reviews", "review")
-        .select("product.id, product.name, AVG(review.rating) as avgRating")
-        .groupBy("product.id");
+      const productsWithReviews = await this.productRepository.find({
+        relations: { reviews: { user: true } },
+      });
 
-      if (minRating && maxRating) {
-        queryBuilder.having("AVG(review.rating) BETWEEN :minRating AND :maxRating", { minRating, maxRating });
-      }
-      if (maxRating) {
-        queryBuilder.having("AVG(review.rating) <= :maxRating", { maxRating });
-      }
-      if (minRating) {
-        queryBuilder.having("AVG(review.rating) >= :minRating", { minRating });
-      }
-      const ratingProducts = await queryBuilder.getRawMany();
-      const updatedRatingProducts = await Promise.all(
-        ratingProducts.map(async item => {
-          const reviews = await this.reviewRepository.find({ where: { productId: item.id } });
-          const updatedReviews = await Promise.all(
-            reviews.map(async reviewItem => {
-              const user = await this.userRepository.findOne({ where: { id: reviewItem.userId } });
-              return { ...reviewItem, username: user.name };
-            }),
-          );
-          return { ...item, reviews: updatedReviews };
-        }),
-      );
-      return res.status(200).json({ msg: "ALL FILTERED RATING PRODUCTS", updatedRatingProducts });
+      const filteredProducts = productsWithReviews.filter(product => {
+        const { reviews } = product;
+        const avgRating = reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0;
+
+        if (minRating && maxRating) {
+          return avgRating >= minRating && avgRating <= maxRating;
+        }
+        if (minRating) {
+          return avgRating >= minRating;
+        }
+        if (maxRating) {
+          return avgRating <= maxRating;
+        }
+        return true;
+      });
+
+      const ratingProducts = filteredProducts.map(product => ({
+        ...product,
+        avgRating: product.reviews.length > 0 ? product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length : 0,
+      }));
+
+      return res.status(200).json({ msg: "ALL FILTERED RATING PRODUCTS", products: ratingProducts });
     }
     return res.status(200).json({ msg: "ALL FILTERED RATING PRODUCTS", updatedProducts });
   };
@@ -202,7 +185,7 @@ export class ProductController {
   public update = async (req: TRequest<UpdateProductDto>, res: TResponse) => {
     const { name, price, imageUrl, description, discount, category } = req.dto as UpdateProductDto;
     const { productId } = req.params;
-    this.productRepository.update({ id: parseInt(productId, 10) }, { name, price, imageUrl, description, discount, category });
+    await this.productRepository.update({ id: parseInt(productId, 10) }, { name, price, imageUrl, description, discount, category });
 
     res.status(200).json({ msg: "PRODUCT_UPDATED" });
   };
