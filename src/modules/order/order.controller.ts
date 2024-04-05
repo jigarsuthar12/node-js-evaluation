@@ -124,7 +124,7 @@ export class OrderController {
         },
       };
     });
-    return res.status(200).json({ msg: "GOT_ORDER", ...productsWithAvgRating });
+    return res.status(200).json({ msg: "GOT_ORDER", Order: productsWithAvgRating });
   };
 
   public getOrderStatus = async (req: TRequest, res: TResponse) => {

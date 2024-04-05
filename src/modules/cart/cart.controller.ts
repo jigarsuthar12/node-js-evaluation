@@ -50,10 +50,7 @@ export class CartController {
       return { ...item, avgRating };
     });
 
-    if (!cart) {
-      return res.status(404).json({ msg: "CAN_NOT_GET_ANY_CART" });
-    }
-    return res.status(200).json({ msg: "GOT_CART_ITEMS", Cart: mappedCartItems });
+    return res.status(200).json({ msg: "GOT_CART_ITEMS", ...cart, cartItems: mappedCartItems });
   };
 
   public create = async (req: TRequest, res: TResponse) => {
