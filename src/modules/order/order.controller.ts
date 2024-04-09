@@ -1,5 +1,5 @@
 import { CartEntity, CartItemEntity, OrderEntity, OrderItemEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
-import { InitRepository, InjectRepositories } from "@helpers";
+import { AvgRating, InitRepository, InjectRepositories } from "@helpers";
 import { EStatus, TRequest, TResponse } from "@types";
 import { Repository } from "typeorm";
 
@@ -51,9 +51,8 @@ export class OrderController {
       return res.status(404).json({ msg: "YOU_HAVE_NO_ORDERS" });
     }
     // Calculate average rating for each product with reviews
-    const productsWithAvgRating = orders.map(item => {
-      const totalRating = item.orderItem[0].product.reviews.reduce((acc, review) => acc + review.rating, 0);
-      const avgRating = totalRating / item.orderItem[0].product.reviews.length;
+    const productsWithAvgRating = orders.map(async item => {
+      const avgRating = await AvgRating.getAvgRating(item.orderItem[0].product.reviews);
 
       return {
         ...item.orderItem[0],
@@ -104,10 +103,8 @@ export class OrderController {
     });
 
     // Calculate average rating for each product with reviews
-    const productsWithAvgRating = orderItem.map(orderItems => {
-      const totalRating = orderItems.product.reviews.reduce((acc, review) => acc + review.rating, 0);
-      const avgRating = totalRating / orderItems.product.reviews.length;
-
+    const productsWithAvgRating = orderItem.map(async orderItems => {
+      const avgRating = await AvgRating.getAvgRating(orderItems.product.reviews);
       return {
         ...orderItems,
         product: {

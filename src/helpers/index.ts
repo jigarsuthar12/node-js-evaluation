@@ -1,3 +1,4 @@
+export * from "./avgRating.helper";
 export * from "./bcrypt.helper";
 export * from "./env-validator.helper";
 export * from "./generate-otp.helper";

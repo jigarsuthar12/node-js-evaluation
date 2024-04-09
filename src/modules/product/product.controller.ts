@@ -1,5 +1,5 @@
 import { ProductEntity, ReviewEntity, UserEntity } from "@entities";
-import { InitRepository, InjectRepositories } from "@helpers";
+import { AvgRating, InitRepository, InjectRepositories } from "@helpers";
 import { ECategory, TRequest, TResponse } from "@types";
 import { Between, FindOperator, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from "typeorm";
 import { CreateProductDto, UpdateProductDto } from "./dto";
@@ -47,9 +47,7 @@ export class ProductController {
     if (!product) {
       return res.status(404).json({ msg: "CAN_NOT_GET_ANY_PRODUCT" });
     }
-    const totalRating = product.reviews.reduce((acc, review) => acc + review.rating, 0);
-    const avgRating = product.reviews.length > 0 ? totalRating / product.reviews.length : 0;
-
+    const avgRating = await AvgRating.getAvgRating(product.reviews);
     const updatedReview = await Promise.all(
       product.reviews.map(async item => {
         const user = await this.userRepository.findOne({ where: { id: item.userId } });
@@ -73,8 +71,7 @@ export class ProductController {
     });
     const updatedProducts = await Promise.all(
       products.map(async item => {
-        const totalRating = item.reviews.reduce((acc, review) => acc + review.rating, 0);
-        const avgRating = item.reviews.length > 0 ? totalRating / item.reviews.length : 0;
+        const avgRating = await AvgRating.getAvgRating(item.reviews);
         return { ...item, avgRating };
       }),
     );
@@ -93,9 +90,7 @@ export class ProductController {
       });
       const updatedProducts = await Promise.all(
         products.map(async item => {
-          const totalRating = item.reviews.reduce((acc, review) => acc + review.rating, 0);
-          const avgRating = item.reviews.length > 0 ? totalRating / item.reviews.length : 0;
-
+          const avgRating = await AvgRating.getAvgRating(item.reviews);
           return { ...item, avgRating };
         }),
       );
@@ -137,8 +132,7 @@ export class ProductController {
     const products = await this.productRepository.find({ relations: { reviews: { user: true } }, where, order });
     const updatedProducts = await Promise.all(
       products.map(async item => {
-        const totalRating = item.reviews.reduce((acc, review) => acc + review.rating, 0);
-        const avgRating = item.reviews.length > 0 ? totalRating / item.reviews.length : 0;
+        const avgRating = await AvgRating.getAvgRating(item.reviews);
         return { ...item, avgRating };
       }),
     );
@@ -166,7 +160,7 @@ export class ProductController {
 
       const ratingProducts = filteredProducts.map(product => ({
         ...product,
-        avgRating: product.reviews.length > 0 ? product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length : 0,
+        avgRating: AvgRating.getAvgRating(product.reviews),
       }));
 
       return res.status(200).json({ msg: "ALL FILTERED RATING PRODUCTS", products: ratingProducts });

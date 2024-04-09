@@ -1,5 +1,5 @@
 import { CartEntity, CartItemEntity, ProductEntity, ReviewEntity, UserEntity } from "@entities";
-import { InitRepository, InjectRepositories } from "@helpers";
+import { AvgRating, InitRepository, InjectRepositories } from "@helpers";
 import { TRequest, TResponse } from "@types";
 import { Repository } from "typeorm";
 
@@ -43,9 +43,8 @@ export class CartController {
       },
     });
 
-    const mappedCartItems = cartItems.map(item => {
-      const mappedProduct = item.product.reviews;
-      const avgRating = mappedProduct.length > 0 ? mappedProduct.reduce((acc, review) => acc + review.rating, 0) / item.product.reviews.length : 0;
+    const mappedCartItems = cartItems.map(async item => {
+      const avgRating = await AvgRating.getAvgRating(item.product.reviews);
 
       return { ...item, avgRating };
     });
@@ -66,7 +65,7 @@ export class CartController {
 
       return res.status(201).json({ msg: "CART_ADDED" });
     }
-    
+
     const cartItemProduct = await this.cartItemRepository.findOne({ where: { productId, cartId: cart.id } });
     if (cartItemProduct) {
       cartItemProduct.quantity += 1;
