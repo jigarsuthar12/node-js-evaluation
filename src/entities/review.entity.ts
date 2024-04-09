@@ -27,7 +27,7 @@ export class ReviewEntity {
 
   @ManyToOne(() => ProductEntity, product => product.reviews)
   @JoinColumn({ name: "productId" })
-  product: ProductEntity;
+  product: ProductEntity[];
 
   @ManyToOne(() => UserEntity, user => user.reviews)
   @JoinColumn({ name: "userId" })

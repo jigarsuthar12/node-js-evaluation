@@ -21,5 +21,5 @@ export class CartEntity {
   user: UserEntity;
 
   @OneToMany(() => CartItemEntity, cart => cart.cart)
-  cart: CartItemEntity;
+  cart: CartItemEntity[];
 }

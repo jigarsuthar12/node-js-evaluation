@@ -1,5 +1,6 @@
 import { EPaymentMethod, EStatus } from "@types";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { OrderItemEntity } from "./orderItem.entity";
 import { UserEntity } from "./user.entity";
 
 @Entity("orders")
@@ -29,6 +30,9 @@ export class OrderEntity {
   @ManyToOne(() => UserEntity, user => user.order)
   @JoinColumn({ name: "userId" })
   user: UserEntity;
+
+  @OneToMany(() => OrderItemEntity, orderItem => orderItem.order)
+  orderItem: OrderItemEntity[];
 
   @CreateDateColumn()
   createdAt: Date;
