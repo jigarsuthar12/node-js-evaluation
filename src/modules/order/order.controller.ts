@@ -52,10 +52,6 @@ export class OrderController {
     }
     // Calculate average rating for each product with reviews
     const productsWithAvgRating = orders.map(item => {
-      if (!item.orderItem[0].product || !item.orderItem[0].product.reviews || item.orderItem[0].product.reviews.length === 0) {
-        return { ...item.orderItem[0], product: { ...item.orderItem[0].product, avgRating: null } };
-      }
-
       const totalRating = item.orderItem[0].product.reviews.reduce((acc, review) => acc + review.rating, 0);
       const avgRating = totalRating / item.orderItem[0].product.reviews.length;
 
@@ -109,10 +105,6 @@ export class OrderController {
 
     // Calculate average rating for each product with reviews
     const productsWithAvgRating = orderItem.map(orderItems => {
-      if (!orderItems.product || !orderItems.product.reviews || orderItems.product.reviews.length === 0) {
-        return { ...orderItems, product: { ...orderItems.product, avgRating: null } };
-      }
-
       const totalRating = orderItems.product.reviews.reduce((acc, review) => acc + review.rating, 0);
       const avgRating = totalRating / orderItems.product.reviews.length;
 

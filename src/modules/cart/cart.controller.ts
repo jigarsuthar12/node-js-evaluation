@@ -66,6 +66,7 @@ export class CartController {
 
       return res.status(201).json({ msg: "CART_ADDED" });
     }
+    
     const cartItemProduct = await this.cartItemRepository.findOne({ where: { productId, cartId: cart.id } });
     if (cartItemProduct) {
       cartItemProduct.quantity += 1;
@@ -81,16 +82,19 @@ export class CartController {
 
   public deleteFromCart = async (req: TRequest, res: TResponse) => {
     const { productId } = req.params as IReviewParams;
+
     const cart = await this.cartRepository.findOne({ where: { userId: req.me.id } });
     if (!cart) {
       return res.status(404).json({ msg: "CAN_NOT_GET_YOUR_CART" });
     }
+
     const cartItem = await this.cartItemRepository.findOne({ where: { cartId: cart.id, productId } });
     if (cartItem.quantity) {
       cartItem.quantity -= 1;
       this.cartItemRepository.save(cartItem);
       return res.status(200).json({ msg: "PRODUCT_FROM_CART_DELETED" });
     }
+
     await this.cartItemRepository.delete({ productId, cartId: cart.id });
     return res.status(200).json({ msg: "PRODUCT_FROM_CART_DELETED" });
   };
