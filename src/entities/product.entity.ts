@@ -42,6 +42,6 @@ export class ProductEntity {
   @ManyToMany(() => CartItemEntity, cart => cart.product)
   cart: CartItemEntity[];
 
-  @ManyToMany(() => OrderItemEntity, orderItem => orderItem.productId)
+  @ManyToMany(() => OrderItemEntity, orderItem => orderItem.product)
   orderItem: OrderItemEntity[];
 }

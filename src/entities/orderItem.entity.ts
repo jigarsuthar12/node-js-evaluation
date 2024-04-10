@@ -18,7 +18,7 @@ export class OrderItemEntity {
 
   @ManyToOne(() => ProductEntity, product => product.orderItem)
   @JoinColumn({ name: "productId" })
-  orderItem: ProductEntity;
+  product: ProductEntity;
 
   @ManyToOne(() => OrderEntity, order => order.id)
   @JoinColumn({ name: "orderId" })
