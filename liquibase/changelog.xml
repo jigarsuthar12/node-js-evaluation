@@ -243,6 +243,20 @@
         referencedTableName="cart"
         onDelete="CASCADE"/>
     </changeSet>
-   
-
+      
+    <changeSet author="jigar" id="33">
+        <addColumn tableName="orders">
+            <column name="paymentKey" type="UUID">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+       
+    </changeSet>
+    <changeSet author="jigar" id="34">
+         <addColumn tableName="orders">
+            <column name="paymentMetadata" type="json">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

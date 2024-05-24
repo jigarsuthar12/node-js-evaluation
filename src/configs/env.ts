@@ -45,6 +45,14 @@ class Env {
   @IsNotEmpty()
   @IsString()
   public domain: string;
+
+  @IsNotEmpty()
+  @IsString()
+  public secretKey: string;
+
+  @IsNotEmpty()
+  @IsString()
+  public endPointSecret: string;
 }
 
 export const env = new Env();
@@ -60,3 +68,5 @@ env.smtpPort = +process.env.SMTP_PORT;
 env.smtpUser = process.env.SMTP_USER;
 env.smtpPass = process.env.SMTP_PASS;
 env.domain = process.env.DOMAIN;
+env.secretKey = process.env.STRIPE_SECRET_KEY;
+env.endPointSecret = process.env.ENDPOINT_SECRET;
